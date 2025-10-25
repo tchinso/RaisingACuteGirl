@@ -58,6 +58,8 @@
 
     .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#10141b;color:#e4f0ff;padding:10px 14px;border:1px solid #273246;border-radius:10px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;pointer-events:none}
     .toast.show{opacity:1;transition:opacity .25s ease}
+
+    .footer-reset{position:sticky;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:560px;z-index:1}
   </style>
 </head>
 <body>
@@ -166,7 +168,9 @@
         <div class="event-box">저녁식사 방식을 고를래?
           <br>• 편의점 도시락 (GLD -8~-12)
           <br>• 직접 요리 (당일 슈퍼 선행 필요, 효율 +40%, GLD -10~-18)
-          <br>• 외식 (휴일만 가능, GLD -25~-50)
+          <br>• 외식 (휴일만 가능, 
+  
+GLD -25~-50)
         </div>
         <div style="height:8px"></div>
         <div class="btns">
@@ -176,15 +180,19 @@
         </div>
       </div>
     </div>
-  </div>
+  
 
-  <div class="footer-reset" style="padding:8px 14px;text-align:center;font-size:11px;color:var(--muted);position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid #1f2330;z-index:20">
+  
+<div class="footer-reset" style="padding:8px 14px;text-align:center;color:var(--muted);background:var(--panel);border-top:1px solid #1f2330">
     <button id="btnReset" style="font:inherit;font-size:11px;color:inherit;background:none;border:none;text-decoration:underline;opacity:.7;cursor:pointer">다시시작</button>
   </div>
+</div>
+
+
+  
 
   <div class="toast" id="toast"></div>
-
-  <script>
+<script>
     // ---------------------- Core Game State ----------------------
     const S = {
       day:1, slot:0, // 0 아침, 1 낮, 2 저녁
@@ -488,7 +496,7 @@
       const bad = (S.stats.GLD < 0);
       if(!bad) return false;
       const reason = (S.stats.GLD < 0) ? '골드가 0 미만' : '';
-      document.querySelectorAll('button').forEach(b=>{ b.disabled = true; });
+      document.querySelectorAll('button').forEach(b=>{ if(b.id!=='btnReset'){ b.disabled = true; } });
       if(el.imgMsg) el.imgMsg.textContent = `자원 부족: ${reason}. 모든 선택지가 비활성화됩니다.`;
       if(el.eventText) el.eventText.textContent = '자원 부족으로 진행할 수 없습니다. 저장/새로고침으로 재시작하세요.';
       return true;
