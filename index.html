@@ -725,7 +725,7 @@
       },
       date_planetarium: ()=>{
         if (!checkBtn('actPlanetarium')) return;
-        applyDelta({AFF:+10, TRU:+4, MOT:+3, MOOD:+1.2, STR:-6, STM:-14, GLD:0});
+        applyDelta({AFF:+10, TRU:+4, MOT:+3, MOOD:+1.2, STR:-6, STM:-14, GLD:-12});
         c.datePlanetarium += 1; setImage(IMG.date_planetarium); nextTime();
       },
       date_cinema: ()=>{
@@ -819,8 +819,8 @@
     setBtnEnabled('actVolunteer', canVolunteer, '휴일, L1+, STM≥20, STR≤60, MOOD≥-1.5');
     const canWalk = holiday && lvl>=1 && stm>=10 && str<=80;
     setBtnEnabled('actWalk', canWalk, '휴일, L1+, STM≥10, STR≤80');
-    const canPlanet = holiday && lvl>=3 && stm>=14 && str<=60 && mood>=-1.5 && inv.starGuide;
-    setBtnEnabled('actPlanetarium', canPlanet, '휴일, L3+, STM≥14, STR≤60, MOOD≥-1.5, 별자리가이드 보유');
+    const canPlanet = holiday && lvl>=3 && stm>=14 && str<=60 && mood>=-1.5 && inv.starGuide && st.GLD>=12; // GLD 조건 추가
+    setBtnEnabled('actPlanetarium', canPlanet, '휴일, L3+, STM≥14, GLD≥12, STR≤60, MOOD≥-1.5, 별자리가이드 보유');
     const canCinema = holiday && lvl>=3 && stm>=20 && str<=60 && mood>=-1.5 && st.GLD>=25 && (inv.movieTicket||0)>=1;
     setBtnEnabled('actCinema', canCinema, '휴일, L3+, STM≥20, STR≤60, MOOD≥-1.5, GLD≥25, 영화티켓≥1');
     const canAmuse = holiday && lvl>=3 && stm>=26 && str<=60 && mood>=-1.5 && st.GLD>=60 && (inv.amusementTicket||0)>=1;
