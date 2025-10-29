@@ -280,7 +280,10 @@
     L5_1:"img/L5_1.png", L5_2:"img/L5_2.png", L5_3:"img/L5_3.png",
     L6_1:"img/L6_1.png", L6_2:"img/L6_2.png", L6_3:"img/L6_3.png",
     L7_1:"img/L7_1.png", L7_2:"img/L7_2.png", L7_3:"img/L7_3.png",
-    L8_1:"img/L8_1.png", L8_2:"img/L8_2.png", L8_3:"img/L8_3.png"
+    L8_1:"img/L8_1.png", L8_2:"img/L8_2.png", L8_3:"img/L8_3.png",
+    married_1: "img/married_1.png",
+    married_2: "img/married_2.png",
+    married_3: "img/married_3.png"
   };
 
   const STORIES = {
@@ -311,8 +314,12 @@
          "L7레벨업\\nL7레벨업\\nL7레벨업\\nL7레벨업"],
     L8: ["L8레벨업\\nL8레벨업\\nL8레벨업\\nL8레벨업",
          "L8레벨업\\nL8레벨업\\nL8레벨업\\nL8레벨업",
-         "L8레벨업\\nL8레벨업\\nL8레벨업\\nL8레벨업"]
-  };
+         "L8레벨업\\nL8레벨업\\nL8레벨업\\nL8레벨업"],
+    married: [
+      "부부 에피소드 1\n함께한 시간의 무게가 조용히 실감되는 밤.\n반지를 바라보며 웃는다.\n내일은 더 다정하게.",
+      "부부 에피소드 2\n서툰 살림과 익숙한 장난.\n사소한 싸움도 금세 풀린다.\n같은 집, 같은 꿈.",
+      "부부 에피소드 3\n둘이서 만든 작은 기념일.\n식탁 위 촛불과 사진 한 장.\n우리가 이루어졌다."
+    ]};
 
   const STORY_IMGS = {
     intro: [IMG.intro_1, IMG.intro_2, IMG.intro_3],
@@ -323,7 +330,7 @@
     L6: [IMG.L6_1, IMG.L6_2, IMG.L6_3],
     L7: [IMG.L7_1, IMG.L7_2, IMG.L7_3],
     L8: [IMG.L8_1, IMG.L8_2, IMG.L8_3],
-  };
+    married: [IMG.married_1, IMG.married_2, IMG.married_3]};
 
   // Preload all images (placed into hidden DOM to ensure caching)
   function preloadAllImages(){
@@ -647,7 +654,7 @@
         if (!checkBtn('actTalk')) return;
         applyDelta({AFF:+3, TRU:+2, MOT:+0, MOOD:+0.5, STR:-2, STM:-5, GLD:0});
         setImage(IMG.talk);
-        if (inv.ring && !S.married){ S.married = true; alert('관계가 "부부"로 승급됐어!'); }
+        if (inv.ring && !S.married){ S.married = true; alert('관계가 "부부"로 승급됐어!'); S.story.pendingQueue.unshift('married'); if (S.mode !== 'story'){ S.story.stage = S.story.pendingQueue.shift(); S.story.idx = 0; S.mode = 'story'; setStoryFrame(); save(); renderAll(); return; } }
         nextTime();
       },
       play: ()=>{
