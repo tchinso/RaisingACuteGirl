@@ -1,1192 +1,949 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>연애 육성 시뮬레이션</title>
-  <style>
-    :root{
-      --bg:#0f1115;--panel:#171a21;--muted:#8c98a9;--hl:#86e1ff;--good:#42d392;--bad:#ff6b6b;--warn:#ffd166;--ink:#e5ecf4;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,Segoe UI,Roboto,Apple SD Gothic Neo,Noto Sans KR,sans-serif}
-    body{margin:0;display:flex;justify-content:center}
-    .app{width:100%;max-width:560px;min-height:100vh;display:flex;flex-direction:column;padding-bottom:88px}
-    header{padding:12px 14px;border-bottom:1px solid #222}
-    header .row{display:flex;gap:8px;align-items:center;justify-content:space-between}
-    .badge{background:#1f2430;border:1px solid #2a3140;color:#c6d6ee;padding:4px 8px;border-radius:10px;font-size:12px}
-    .time-chip{display:inline-flex;gap:6px;align-items:center}
-    .time-dot{width:8px;height:8px;border-radius:50%}
-    .dot-morning{background:#ffd166}
-    .dot-day{background:#86e1ff}
-    .dot-evening{background:#ff6b6b}
-
-    /* Collapsible stats */
-    details.stats{background:var(--panel);border-top:1px solid #1f2330;border-bottom:1px solid #1f2330}
-    details.stats>summary{list-style:none;padding:10px 14px;cursor:pointer;user-select:none;display:flex;align-items:center;gap:10px}
-    details.stats>summary::-webkit-details-marker{display:none}
-    .chev{transition:transform .25s ease}
-    details[open] .chev{transform:rotate(90deg)}
-    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 14px 14px}
-    .card{background:#12151c;border:1px solid #1e2330;border-radius:12px;padding:10px}
-    .stat-name{font-size:12px;color:var(--muted)}
-    .stat-value{font-weight:700;margin-top:4px}
-    .bar{height:6px;background:#0b0f16;border-radius:6px;margin-top:8px;position:relative}
-    .bar>i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,#4ad,#7af)}
-    .inv{padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap}
-    .tag{border:1px dashed #2a3140;padding:2px 8px;border-radius:999px;font-size:12px}
-
-    /* Illustration area */
-    .illustration{height:50vh;min-height:300px;background:#0b0f16;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-    .illustration img{width:100%;height:100%;object-fit:cover;display:block}
-    .img-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.6));pointer-events:none}
-    .img-msg{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:8px;font-size:12px}
-
-    /* Action / Event panel */
-    .panel{padding:12px 14px;background:var(--panel);border-top:1px solid #1f2330}
-    .groups{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px}
-    .group{flex:1 1 calc(50% - 10px)}
-    .group h4{margin:0 0 8px 0;color:#c9d6f0;font-size:14px}
-    .btns{display:flex;flex-wrap:wrap;gap:8px}
-    button{background:#1a1f2b;border:1px solid #263147;color:#d3e0f7;border-radius:10px;padding:10px 12px;font-size:14px}
-    button:disabled{opacity:.45;filter:grayscale(.3)}
-    .row-slim{display:flex;gap:8px;align-items:center}
-    .pill{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #2d374e;background:#141924;color:#aab9d6}
-
-    .event-box{white-space:pre-wrap;line-height:1.55;background:#12151c;border:1px solid #242b3a;border-radius:12px;padding:12px}
-    .hidden{display:none}
-
-    .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#10141b;color:#e4f0ff;padding:10px 14px;border:1px solid #273246;border-radius:10px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;pointer-events:none}
-    .toast.show{opacity:1;transition:opacity .25s ease}
-
-    .footer-reset{position:sticky;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:560px;z-index:1}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>모바일 육성 시뮬레이터 (TXT 스펙 구현)</title>
+<style>
+  :root{
+    --bg:#0f1115;
+    --panel:#171a21;
+    --muted:#8a93a6;
+    --text:#eef2ff;
+    --accent:#6aa7ff;
+    --accent2:#88f7c1;
+    --danger:#ff6a6a;
+    --warn:#ffc463;
+    --ok:#7cd992;
+    --btn:#222735;
+    --btn2:#2a3142;
+    --disabled:#3a4155;
+    --line:#262b38;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family: system-ui, -apple-system, Segoe UI, Roboto, Pretendard, Apple SD Gothic Neo, 'Noto Sans KR', sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:10px 10px 80px}
+  header{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 10px;
+    position:sticky; top:0; z-index:5; backdrop-filter: blur(6px);
+  }
+  header .cell{
+    display:flex;flex-direction:column;gap:2px;min-width:0
+  }
+  .label{font-size:12px;color:var(--muted)}
+  .value{font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .tag{display:inline-block;border:1px solid var(--line);background:#12141b;border-radius:999px;padding:2px 8px;font-size:12px;color:var(--muted);margin-left:6px}
+  details.stats{
+    margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden
+  }
+  details.stats summary{
+    list-style:none;padding:12px 14px;cursor:pointer;font-weight:700
+  }
+  details.stats[open] summary{border-bottom:1px solid var(--line)}
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+  .stat{background:var(--btn);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .stat .nm{font-size:12px;color:var(--muted)}
+  .stat .val{font-size:16px;font-weight:800}
+  .img-stage{
+    margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    height:50vh; min-height:320px; display:flex;align-items:center;justify-content:center;overflow:hidden; position:relative;
+  }
+  .img-stage img{max-width:100%;max-height:100%;object-fit:contain; display:block}
+  .actions{
+    margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden
+  }
+  .section-title{padding:10px 12px;border-bottom:1px solid var(--line);font-weight:800}
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+  button{
+    background:var(--btn2); color:var(--text); border:1px solid var(--line); padding:10px 8px; border-radius:10px;
+    font-weight:700; font-size:14px; cursor:pointer; transition:transform .02s ease;
+  }
+  button:hover{transform:translateY(-1px)}
+  button:active{transform:translateY(0)}
+  button.secondary{background:var(--btn)}
+  button.accent{background:linear-gradient(180deg, rgba(106,167,255,.2), rgba(106,167,255,.08)); border-color:#2b3a66}
+  button.danger{background:linear-gradient(180deg, rgba(255,106,106,.2), rgba(255,106,106,.08)); border-color:#5b2b2b}
+  button:disabled{
+    background:var(--disabled); color:#99a0b6; border-color:#3a4155; cursor:not-allowed; transform:none
+  }
+  .note{padding:10px 12px;color:var(--muted);font-size:14px}
+  .novel{padding:12px;line-height:1.6; white-space:pre-line}
+  .novel .next{margin-top:12px}
+  .group{border-top:1px dashed var(--line)}
+  .inv{display:flex; flex-wrap:wrap; gap:6px; padding:10px 12px}
+  .chip{
+    display:inline-flex; gap:6px; align-items:center; border:1px solid var(--line); background:var(--btn);
+    padding:6px 10px; border-radius:999px; font-size:12px
+  }
+  .chip button{font-size:12px; padding:4px 8px}
+  .footer{
+    position:sticky; bottom:0; left:0; right:0;
+    background:linear-gradient(180deg, rgba(15,17,21,.0), rgba(15,17,21,.9) 35%, rgba(15,17,21,1) 100%);
+    padding:14px 10px 16px; z-index:5; backdrop-filter: blur(6px);
+  }
+  .footer .inner{
+    max-width:760px; margin:0 auto; display:flex; gap:8px
+  }
+  .hr{height:1px;background:var(--line);margin:0}
+  .hidden{display:none !important}
+  .holiday{color:var(--warn);font-weight:800}
+  .ok{color:var(--ok);font-weight:800}
+  .warn{color:var(--warn);font-weight:800}
+  .danger-text{color:var(--danger);font-weight:800}
+  .tips{padding:8px 12px; color:var(--muted); font-size:12px; border-top:1px dashed var(--line)}
+</style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="row">
-        <div id="lblDay" class="badge">1일째</div>
-        <div class="time-chip badge" id="lblTime">
-          <span class="time-dot dot-morning" id="dot"></span>
-          <span id="timeText">아침</span>
-        </div>
-        <div class="badge" id="lblLevel">Lv.1</div>
-      </div>
-    </header>
+<div class="wrap">
+  <header>
+    <div class="cell">
+      <div class="label">현재 날짜</div>
+      <div class="value" id="dayText">1일째</div>
+      <div class="label"><span id="holidayTag" class="tag">평일</span></div>
+    </div>
+    <div class="cell">
+      <div class="label">현재 시간</div>
+      <div class="value" id="timeText">아침</div>
+    </div>
+    <div class="cell">
+      <div class="label">현재 레벨</div>
+      <div class="value"><span id="levelText">L1</span><span id="marriedTag" class="tag hidden">관계: 부부</span></div>
+    </div>
+  </header>
 
-    <details class="stats" id="stats">
-      <summary>
-        <span class="chev">▶</span>
-        캐릭터 스탯 보기
-        <span class="pill" id="pillMult">배수 m/s 1.0 / 1.0</span>
-        <span class="pill" id="pillGold">GLD 100</span>
-      </summary>
-      <div class="stat-grid">
-        <div class="card"><div class="stat-name">AFF 호감</div><div class="stat-value" id="vAFF">0</div><div class="bar"><i id="bAFF" style="width:0%"></i></div></div>
-        <div class="card"><div class="stat-name">TRU 신뢰</div><div class="stat-value" id="vTRU">0</div><div class="bar"><i id="bTRU" style="width:0%"></i></div></div>
-        <div class="card"><div class="stat-name">MOT 동기</div><div class="stat-value" id="vMOT">0</div><div class="bar"><i id="bMOT" style="width:0%"></i></div></div>
-        <div class="card"><div class="stat-name">MOOD 기분(-2~+2)</div><div class="stat-value" id="vMOOD">0</div><div class="bar"><i id="bMOOD" style="width:50%"></i></div></div>
-        <div class="card"><div class="stat-name">STR 스트레스</div><div class="stat-value" id="vSTR">0</div><div class="bar"><i id="bSTR" style="width:0%"></i></div></div>
-        <div class="card"><div class="stat-name">STM 기력</div><div class="stat-value" id="vSTM">100</div><div class="bar"><i id="bSTM" style="width:100%"></i></div></div>
-      </div>
-      <div class="inv" id="inv"></div>
-    </details>
+  <details class="stats">
+    <summary>캐릭터 스탯 (탭하여 펼치기)</summary>
+    <div class="stats-grid">
+      <div class="stat"><div class="nm">AFF</div><div class="val" id="s_aff">0</div></div>
+      <div class="stat"><div class="nm">TRU</div><div class="val" id="s_tru">0</div></div>
+      <div class="stat"><div class="nm">MOT</div><div class="val" id="s_mot">0</div></div>
+      <div class="stat"><div class="nm">MOOD</div><div class="val" id="s_mood">0</div></div>
+      <div class="stat"><div class="nm">STR</div><div class="val" id="s_str">0</div></div>
+      <div class="stat"><div class="nm">STM</div><div class="val" id="s_stm">0</div></div>
+      <div class="stat"><div class="nm">GLD</div><div class="val" id="s_gld">0</div></div>
+    </div>
+  </details>
 
-    <div class="illustration" id="illu">
-      <img id="illuImg" alt="illustration" />
-      <div class="img-overlay"></div>
-      <div class="img-msg" id="imgMsg">행동을 선택해 시작하세요</div>
+  <div class="img-stage">
+    <img id="heroImg" alt="일러스트" src="img/start.png"/>
+  </div>
+
+  <div class="actions" id="actionsPanel">
+    <div class="section-title" id="modeTitle">행동 선택</div>
+    <div id="novelPanel" class="novel hidden">
+      <div id="novelText">게임시작<br/>게임시작<br/>게임시작<br/>게임시작</div>
+      <button id="btnNextNovel" class="next accent">다음</button>
     </div>
 
-    <div class="panel">
-      <!-- ACTIONS MODE -->
-      <div id="actionsMode">
-        <div class="groups">
-          <div class="group">
-            <h4>말걸기</h4>
-            <div class="btns">
-              <button data-act="talk">대화하기</button>
-              <button data-act="play">놀아주기</button>
-              <button data-act="study">공부하기</button>
-            </div>
-          </div>
-          <div class="group">
-            <h4>스킨십</h4>
-            <div class="btns">
-              <button data-act="pet" disabled>쓰다듬기(L2)</button>
-              <button data-act="hug" disabled>껴안기(L4)</button>
-              <button data-act="kiss" disabled>키스(L5)</button>
-            </div>
-          </div>
-          <div class="group">
-            <h4>휴식</h4>
-            <div class="btns">
-              <button data-act="rest">그냥 쉬기</button>
-              <button data-act="tea">차 마시기</button>
-              <button data-act="sleep">잠자기</button>
-              <button data-act="sleepTogether" disabled>함께 자기(L6)</button>
-            </div>
-          </div>
-<div class="group"><h4>목욕</h4><div class="btns"><button data-act="bathTogether" disabled>함께 목욕(L7)</button></div></div>
-          <div class="group">
-            <h4>일/쇼핑</h4>
-            <div class="btns">
-              <button data-act="work">일하기</button>
-              <button data-act="super">슈퍼</button>
-              <button data-act="book">서점</button>
-              <button data-act="pharm">약국</button>
-            </div>
-          </div>
-          <div class="group">
-            <h4>휴일 전용</h4>
-            <div class="btns">
-              <button data-act="volunteer">봉사활동</button>
-              <button data-act="walk">산책하기</button>
-              <button data-act="date" disabled>데이트(L3)</button>
-            </div>
-          </div>
-        </div>
-        <div class="row-slim">
-          <span class="pill" id="pillRepeat">연속카테고리 ×1.00</span>
-          <span class="pill" id="pillStressTier">스트레스 단계: 정상</span>
-          <span class="pill" id="pillFlags">오늘: 슈퍼×</span>
+    <div id="dinnerPanel" class="hidden">
+      <div class="note">저녁시간이야. 식사를 골라줘.</div>
+      <div class="btns">
+        <button id="btnDinnerCStore">편의점도시락 (GLD≥18)</button>
+        <button id="btnDinnerCook">직접 요리 (GLD≥8 &amp; 밀키트≥1)</button>
+        <button id="btnDinnerOut">외식(휴일 전용, GLD≥50)</button>
+      </div>
+      <div class="tips">조건이 안 되면 버튼이 비활성화돼. 돈이 전혀 없으면 안전장치로 ‘건너뛰기’가 자동 적용돼.</div>
+    </div>
+
+    <div id="bathPanel" class="hidden">
+      <div class="note">목욕 시간이야. 어떻게 할까?</div>
+      <div class="btns">
+        <button id="btnBathSolo">혼자서 목욕 (GLD≥3)</button>
+        <button id="btnBathTogether">함께 목욕 (L7+, GLD≥3, STR≤40, MOOD≥-1.0, 배스밤≥1)</button>
+      </div>
+    </div>
+
+
+    <div id="shopPanel" class="hidden">
+      <div class="note" id="shopNote">무엇을 살까?</div>
+      <div class="btns" id="shopButtons"></div>
+      <div class="tips">
+        <button id="btnShopCancel" class="secondary" style="width:100%">구경만 하고 나가기</button>
+      </div>
+    </div>
+
+    <div id="actionGroups">
+      <div class="group">
+        <div class="section-title">말걸기</div>
+        <div class="btns">
+          <button id="actTalk">대화하기</button>
+          <button id="actPlay">놀아주기</button>
+          <button id="actStudy">공부하기</button>
         </div>
       </div>
 
-      <!-- EVENT MODE (sub events / level up / dinner choices) -->
-      <div id="eventMode" class="hidden">
-        <div id="eventText" class="event-box">이벤트 텍스트를 불러오는 중…</div>
-        <div style="height:8px"></div>
+      <div class="group">
+        <div class="section-title">스킨십</div>
         <div class="btns">
-          <button id="btnBack">행동선택으로 돌아가기</button>
+          <button id="actPet">쓰다듬기</button>
+          <button id="actHug">껴안기</button>
+          <button id="actKiss">키스</button>
         </div>
       </div>
 
-      <!-- DINNER/BATH chooser (auto at evening) -->
-      <div id="dinnerMode" class="hidden">
-        <div class="event-box">저녁식사 방식을 고를래?
-          <br>• 편의점 도시락 (GLD -8~-12)
-          <br>• 직접 요리 (당일 슈퍼 선행 필요, 효율 +40%, GLD -10~-18)
-          <br>• 외식 (휴일만 가능, 
-  
-GLD -25~-50)
-        </div>
-        <div style="height:8px"></div>
+      <div class="group">
+        <div class="section-title">휴식</div>
         <div class="btns">
-          <button data-dinner="conbini">편의점 도시락</button>
-          <button data-dinner="cook" id="btnCook">직접 요리</button>
-          <button data-dinner="dineout" id="btnDineOut">외식(휴일)</button>
+          <button id="actRest">그냥 쉬기</button>
+          <button id="actTea">차 마시기</button>
+          <button id="actSleepSep">따로 자기</button>
+          <button id="actSleepTog">함께 자기</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="section-title">일하기</div>
+        <div class="btns">
+          <button id="actWork">일하기</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="section-title">쇼핑하기</div>
+        <div class="btns">
+          <button id="actMarket">슈퍼</button>
+          <button id="actBook">서점</button>
+          <button id="actPharm">약국</button>
+        </div>
+        <div class="inv" id="inventoryChips"></div>
+        <div class="tips">인벤토리에서 피로회복제와 항우울제는 클릭으로 즉시 사용 가능.</div>
+      </div>
+
+      <div class="group" id="holidayGroup">
+        <div class="section-title">휴일 전용</div>
+        <div class="btns">
+          <button id="actVolunteer">봉사활동</button>
+          <button id="actWalk">산책</button>
+          <button id="actPlanetarium">천문관 데이트</button>
+          <button id="actCinema">영화관 데이트</button>
+          <button id="actAmusement">유원지 데이트</button>
         </div>
       </div>
     </div>
-  
+  </div>
 
-  
-<div class="footer-reset" style="padding:8px 14px;text-align:center;color:var(--muted);background:var(--panel);border-top:1px solid #1f2330">
-    <button id="btnReset" style="font:inherit;font-size:11px;color:inherit;background:none;border:none;text-decoration:underline;opacity:.7;cursor:pointer">다시시작</button>
+  <div class="footer">
+    <div class="inner">
+      <button id="btnRestart" class="danger" style="flex:1">다시 시작</button>
+      <button id="btnQuickSave" class="secondary" style="flex:1">즉시 저장</button>
+      <button id="btnQuickLoad" class="secondary" style="flex:1">불러오기</button>
+    </div>
   </div>
 </div>
 
+<!-- 미리 불러올 이미지들을 모아두는 숨김 컨테이너 -->
+<div id="preloadBin" class="hidden" aria-hidden="true"></div>
 
-  
-
-  <div class="toast" id="toast"></div>
 <script>
-    // ---------------------- Core Game State ----------------------
-    const S = {
-      day:1, slot:0, // 0 아침, 1 낮, 2 저녁
-      level:1,
-      stats:{AFF:0,TRU:0,MOT:0,MOOD:0,STR:0,STM:100,GLD:100},
-      flags:{visitedSuper:false, lastCategory:null, repeatCount:0, forcedRest:0, lastTwoActs:[], bathsaltReady:0, labels:{} },
-      inventory:{}, // id -> {name, charges|null}
-      completedByLevel:{1:new Set(),2:new Set(),3:new Set(),4:new Set(),5:new Set(),6:new Set(),7:new Set()},
-      rng:{crit:0.08,fumble:0.06,swing:0.2},
-      dayAff:0,
-      maxRepeatCountToday:0,
-      daysLowRepeatStreak:0,
-      daysStrBelow40Streak:0
-    };
-
-    const LEVEL_THRESH={2:35,3:85,4:150,5:230,6:320,7:420,8:540}; // AFF 문턱
-
-    // Actions DB (base deltas before multipliers): AFF,TRU,MOT,MOOD,STR,STM,GLD
-    const ACT = {
-      talk:{name:'대화하기', cat:'말걸기', base:[3,2,0,0.5,-2,-5,0], img:'/img/action_talk.png', tags:{}},
-      play:{name:'놀아주기', cat:'말걸기', base:[5,0,3,1,-1,-12,randBetween(-3,0)], img:'/img/action_play.png', tags:{repeatMotDrop:true}},
-      study:{name:'공부하기', cat:'말걸기', base:[0,2,8,-0.5,6,-15,0], img:'/img/action_study.png', tags:{study:true}},
-      pet:{name:'쓰다듬기', cat:'스킨십', base:[4,2,-2,1,-6,-4,0], img:'/img/action_pet.png', tags:{affection:true, gatedLevel:2}},
-      hug:{name:'껴안기', cat:'스킨십', base:[7,3,-3,1.2,-10,-6,0], img:'/img/action_hug.png', tags:{affection:true, gatedLevel:4}},
-      kiss:{name:'키스', cat:'스킨십', base:[11,3,-5,1.5,-8,-6,0], img:'/img/action_kiss.png', tags:{affection:true, gatedLevel:5}},
-      rest:{name:'그냥 쉬기', cat:'휴식', base:[0,0,0,0.5,-12,16,0], img:'/img/action_rest.png', tags:{care:true}},
-      tea:{name:'차 마시기', cat:'휴식', base:[1,1,0,0.7,-8,10,randBetween(-5,-2)], img:'/img/action_tea.png', tags:{care:true, tea:true}},
-      sleep:{name:'잠자기', cat:'휴식', base:[0,0,2,0,-15,60,0], img:'/img/action_sleep.png', tags:{sleep:true}},
-      sleepTogether:{name:'함께 자기', cat:'휴식', base:[4,3,4,1,-20,70,0], img:'/img/action_sleeptogether.png', tags:{affection:true, sleep:true, gatedLevel:6}},
-      bathTogether:{name:'함께 목욕', cat:'휴식', base:[6,4,2,1.3,-18,12,randBetween(-3,0)], img:'/img/action_bathtogether.png', tags:{affection:true, bath:true, gatedLevel:7}},
-      work:{name:'일하기', cat:'일/쇼핑', base:[0,1,-2,-0.5,12,-18,randBetween(25,40)], img:'/img/action_work.png', tags:{work:true}},
-      super:{name:'슈퍼', cat:'일/쇼핑', base:[0,0,0,0,-2,-6,randBetween(-20,-8)], img:'/img/action_super.png', tags:{shop:'super'}},
-      book:{name:'서점', cat:'일/쇼핑', base:[0,0,0,0,-1,-4,randBetween(-20,-12)], img:'/img/action_book.png', tags:{shop:'book'}},
-      pharm:{name:'약국', cat:'일/쇼핑', base:[0,0,0,0,-15,0,randBetween(-35,-25)], img:'/img/action_pharm.png', tags:{shop:'pharm'}},
-      volunteer:{name:'봉사활동', cat:'휴일', base:[0,4,10,0.5,10,-20,0], img:'/img/action_volunteer.png', tags:{holiday:true}},
-      walk:{name:'산책', cat:'휴일', base:[3,1,2,0.8,-6,-10,0], img:'/img/action_walk.png', tags:{holiday:true}},
-      date:{name:'데이트', cat:'휴일', base:[10,4,3,1.2,-6,-14,randBetween(-60,-25)], img:'/img/action_date.png', tags:{holiday:true, gatedLevel:3}},
-    };
-
-    // Shop items (subset; charges=null means permanent)
-    const SHOP = {
-      super:[
-        {id:'recipe', name:'레시피 키트', price:18, charges:1, note:"맛있는 수제 요리 레시피"},
-        {id:'bathsalt', name:'입욕제', price:14, charges:1, note:'스트레스가 풀리는 입욕제'},
-        {id:'tealeaf', name:'차잎(블렌드)', price:10, charges:3, note:'마시면 기분이 좋아지는 차'},
-        {id:'bento', name:'보온 도시락', price:16, charges:1, note:'영양이 가득한 도시락'},
-        {id:'blanket', name:'담요', price:20, charges:null, note:'따뜻한 담요'}
-      ],
-      book:[
-        {id:'tech', name:'기술서', price:20, charges:null, note:'공부에 도움이 되는 책'},
-        {id:'exam', name:'수험서', price:22, charges:2, note:'공부에 도움이 되는 책'},
-        {id:'cookbook', name:'요리책', price:16, charges:null, note:'요리고수로 만들어주는 기초서'},
-        {id:'zodiac', name:'별자리 가이드', price:14, charges:null, note:'밤하늘을 수놓는 아름다운 그림'},
-        {id:'film', name:'사진필름', price:12, charges:3, note:'필름카메라용 사진 필름'},
-        {id:'music', name:'음반/플레이리스트', price:12, charges:3, note:'기분이 좋아지는 음악'},
-        {id:'movie', name:'영화 예매권', price:24, charges:1, note:'영화를 볼 수 있는 티켓'},
-        {id:'ring', name:'반지', price:500, charges:null, note:'세상에서 가장 특별한 사람에게 주는 것'}
-      ],
-      pharm:[
-        {id:'antidote', name:'해독제', price:26, charges:1, note:'스트레스를 줄여주는 약'},
-        {id:'calm', name:'진정팩', price:18, charges:1, note:'기분이 진정되는 마스크팩'}
-      ]
-    };
-
-    // Sub-events (L2 only for sample; extend similarly)
-    const EVENTS = [
-
-{id:'L2_MOT40_Tech_Study', level:2, type:'sub', once:true,
- trigger:{stats:{MOT:{gte:40}}, items:['tech'], sequence:['study']},
- reward:{TRU:2, MOT:3}},
-{id:'L2_STR20_Antidote_Use', level:2, type:'sub', once:true,
- trigger:{stats:{STR:{gte:20}}, items:['antidote'], sequence:['use_antidote']},
- reward:{STR:-20, TRU:2}},
-{id:'L2_MOOD0_Tea_Talk', level:2, type:'sub', once:true,
- trigger:{stats:{MOOD:{gte:0}}, items:['tealeaf'], sequence:['tea','talk']},
- reward:{AFF:2, TRU:1}},
-{id:'L2_MOT30_Recipe_Cook', level:2, type:'sub', once:true,
- trigger:{stats:{MOT:{gte:30}}, items:['recipe'], sequence:['dinner_cook']}, reward:{AFF:2, MOOD:0.5}},
-{id:'L2_TRU5_Talkx2', level:2, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:5}}, counter:{talk:2}}, reward:{TRU:2}},
-{id:'L2_MOODneg_Walk', level:2, type:'sub', once:true,
- trigger:{stats:{MOOD:{lt:0}}, sequence:['walk']}, reward:{MOOD:1, AFF:1}},
-{id:'L2_STR30_Rest', level:2, type:'sub', once:true,
- trigger:{stats:{STR:{gte:30}}, sequence:['rest']}, reward:{STR:-12, BUFF:{nextPetCrit:+0.10}}},
-{id:'L2_STM40_TeaBeforeSleep', level:2, type:'sub', once:true,
- trigger:{stats:{STM:{lte:40}}, sequence:['tea','sleep']}, reward:{STM:+10, MOOD:+0.3}},
-{id:'L2_GLD20_Bento_Play_Cook', level:2, type:'sub', once:true,
- trigger:{stats:{GLD:{gte:20}}, items:['bento'], sequence:['play','dinner_cook']}, reward:{AFF:2, MOT:2}},
-{id:'L2_Distinct3Cats', level:2, type:'sub', once:true,
- trigger:{meta:{threeDistinctCats:true}}, reward:{TRU:2}},
-{id:'L2_MOT50_Study2in3', level:2, type:'sub', once:true,
- trigger:{stats:{MOT:{gte:50}}, meta:{study2in3:true}}, reward:{TRU:2}}
-,
-
-{id:'L3_Movie_Date', level:3, type:'sub', once:true,
- trigger:{stats:{}, items:['movie'], sequence:['date']}, reward:{AFF:3, TRU:1}},
-{id:'L3_MOT60_Tech_Study2', level:3, type:'sub', once:true,
- trigger:{stats:{MOT:{gte:60}}, items:['tech'], counter:{study:2}}, reward:{TRU:3, MOT:4}},
-{id:'L3_STR30_Tea_Talk', level:3, type:'sub', once:true,
- trigger:{stats:{STR:{gte:30}}, items:['tealeaf'], sequence:['tea','talk']}, reward:{AFF:2, TRU:2}},
-{id:'L3_Walkx2', level:3, type:'sub', once:true,
- trigger:{counter:{walk:2}}, reward:{MOOD:1}},
-{id:'L3_Recipe_Super_Cook', level:3, type:'sub', once:true,
- trigger:{items:['recipe'], sequence:['dinner_cook']}, reward:{AFF:3, TRU:1}},
-{id:'L3_MoodNeg_Play_Rest', level:3, type:'sub', once:true,
- trigger:{stats:{MOOD:{lt:0}}, sequence:['play','rest']}, reward:{MOOD:1.2, STR:-8}},
-{id:'L3_TRU15_Talk3', level:3, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:15}}, counter:{talk:3}}, reward:{TRU:3}},
-{id:'L3_GLD50_DineOut', level:3, type:'sub', once:true,
- trigger:{stats:{GLD:{gte:50}}, sequence:['dinner_dineout']}, reward:{AFF:2}},
-{id:'L3_STR35_Bath_Calm', level:3, type:'sub', once:true,
- trigger:{stats:{STR:{gte:35}}, items:['calm'], sequence:['bath','use_calm']}, reward:{STR:-10, MOOD:+0.5}},
-{id:'L3_STM30_Tea_Sleep', level:3, type:'sub', once:true,
- trigger:{stats:{STM:{lte:30}}, sequence:['tea','sleep']}, reward:{STM:10, MOT:3}},
-{id:'L3_NoRepeatCats', level:3, type:'sub', once:true,
- trigger:{meta:{noRepeat:true}}, reward:{TRU:2}}
-,
-
-{id:'L4_Blanket_Rest_Hug', level:4, type:'sub', once:true,
- trigger:{stats:{STR:{gte:30}}, items:[], sequence:['rest','hug']}, reward:{AFF:3, STR:-8}},
-{id:'L4_MOT65_Exam_Study2', level:4, type:'sub', once:true,
- trigger:{stats:{MOT:{gte:65}}, items:['exam'], counter:{study:2}}, reward:{TRU:3, MOT:4}},
-{id:'L4_Film_Play', level:4, type:'sub', once:true,
- trigger:{items:['film'], sequence:['play']}, reward:{AFF:2}},
-{id:'L4_TRU25_TalkTalkPet', level:4, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:25}}, sequence:['talk','talk','pet']}, reward:{TRU:3, AFF:2}},
-{id:'L4_Recipe_Cook2', level:4, type:'sub', once:true,
- trigger:{items:['recipe'], counter:{dinner_cook:2}}, reward:{AFF:3}},
-{id:'L4_Antidote_Use_WalkBuff', level:4, type:'sub', once:true,
- trigger:{stats:{STR:{gte:40}}, items:['antidote'], sequence:['use_antidote']}, reward:{STR:-25, BUFF:{nextWalkMood:0.5}}},
-{id:'L4_MoodNeg_Walk_Tea', level:4, type:'sub', once:true,
- trigger:{stats:{MOOD:{lt:0}}, sequence:['walk','tea']}, reward:{MOOD:1.2, TRU:1}},
-{id:'L4_MixedStudyWork3', level:4, type:'sub', once:true,
- trigger:{meta:{mixedSW3:true}}, reward:{MOT:5, TRU:2}},
-{id:'L4_GLD80_DineOut', level:4, type:'sub', once:true,
- trigger:{stats:{GLD:{gte:80}}, sequence:['dinner_dineout']}, reward:{AFF:3, TRU:1}},
-{id:'L4_STM25_SleepNow', level:4, type:'sub', once:true,
- trigger:{stats:{STM:{lte:25}}, sequence:['sleep']}, reward:{MOOD:0.5, STR:-5}},
-{id:'L4_TodayAff16Plus', level:4, type:'sub', once:true,
- trigger:{meta:{todayAff16:true}}, reward:{MOOD:1, STR:-10}}
-,
-
-{id:'L5_Zodiac_Night_WalkTalk', level:5, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:40}}, items:['zodiac'], sequence:['walk','talk'], time:'evening'}, reward:{AFF:2}},
-{id:'L5_MOT70_Tech_Study3', level:5, type:'sub', once:true,
- trigger:{stats:{MOT:{gte:70}}, items:['tech'], counter:{study:3}}, reward:{TRU:4}},
-{id:'L5_STR35_Tea_Kiss', level:5, type:'sub', once:true,
- trigger:{stats:{STR:{gte:35}}, items:['tealeaf'], sequence:['tea','kiss']}, reward:{AFF:4, STR:-8}},
-{id:'L5_Film_Play_Photo', level:5, type:'sub', once:true,
- trigger:{items:['film'], sequence:['play']}, reward:{AFF:3}},
-{id:'L5_Recipe_Cook_Kiss', level:5, type:'sub', once:true,
- trigger:{items:['recipe'], sequence:['dinner_cook','kiss']}, reward:{TRU:2}},
-{id:'L5_Movie_Date', level:5, type:'sub', once:true,
- trigger:{stats:{GLD:{gte:60}}, items:['movie'], sequence:['date']}, reward:{AFF:3}},
-{id:'L5_StrBelow40_3Days', level:5, type:'sub', once:true,
- trigger:{meta:{strBelow40Streak:3}}, reward:{TRU:3}},
-{id:'L5_STM40_Rest_Kiss', level:5, type:'sub', once:true,
- trigger:{stats:{STM:{lte:40}}, sequence:['rest','kiss']}, reward:{AFF:3}},
-{id:'L5_TRU45_Bath_Calm', level:5, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:45}}, items:['calm'], sequence:['bath','use_calm']}, reward:{AFF:3, STR:-8}},
-{id:'L5_MoodNeg_Walkx2', level:5, type:'sub', once:true,
- trigger:{stats:{MOOD:{lt:0}}, counter:{walk:2}}, reward:{MOOD:1.5, AFF:2}},
-{id:'L5_RepeatDiscipline5Days', level:5, type:'sub', once:true,
- trigger:{meta:{lowRepeatStreak:5}}, reward:{TRU:2}}
-,
-
-{id:'L6_TRU55_Blanket_SleepTogether', level:6, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:55}}, items:['blanket'], sequence:['rest','sleepTogether']}, reward:{TRU:3, MOOD:0.5}},
-{id:'L6_MOT75_Exam_Study2', level:6, type:'sub', once:true,
- trigger:{stats:{MOT:{gte:75}}, items:['exam'], counter:{study:2}}, reward:{TRU:3, MOT:4}},
-{id:'L6_STR30_Antidote_Bath', level:6, type:'sub', once:true,
- trigger:{stats:{STR:{gte:30}}, items:['antidote'], sequence:['use_antidote','bath']}, reward:{STR:-25}},
-{id:'L6_Mood1_Music_Lullaby', level:6, type:'sub', once:true,
- trigger:{stats:{MOOD:{gte:1}}, items:['music'], sequence:['play','sleepTogether']}, reward:{}},
-{id:'L6_Recipe_Cook_SleepTogether', level:6, type:'sub', once:true,
- trigger:{items:['recipe'], sequence:['dinner_cook','sleepTogether']}, reward:{AFF:3}},
-{id:'L6_GLD90_DineOut', level:6, type:'sub', once:true,
- trigger:{stats:{GLD:{gte:90}}, sequence:['dinner_dineout']}, reward:{TRU:3}},
-{id:'L6_STM35_Tea_Sleep', level:6, type:'sub', once:true,
- trigger:{stats:{STM:{lte:35}}, sequence:['tea','sleep']}, reward:{MOT:4}},
-{id:'L6_StrBelow40_5Days', level:6, type:'sub', once:true,
- trigger:{meta:{strBelow40Streak:5}}, reward:{TRU:4}},
-{id:'L6_TRU60_TalkTalkPet', level:6, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:60}}, sequence:['talk','talk','pet']}, reward:{TRU:3, AFF:2}},
-{id:'L6_MoodNeg_Walk_Rest', level:6, type:'sub', once:true,
- trigger:{stats:{MOOD:{lt:0}}, sequence:['walk','rest']}, reward:{MOOD:1.5, STR:-10}},
-{id:'L6_LowRepeat4Days', level:6, type:'sub', once:true,
- trigger:{meta:{lowRepeatStreak:4}}, reward:{TRU:3}}
-,
-
-{id:'L7_BathTogether_with_Bathsalt', level:7, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:0}}, items:['bathsalt'], sequence:['bathTogether']}, reward:{AFF:3}, note:'다음 1칸 크리티컬+10%는 엔진 단순화로 생략'},
-{id:'L7_MOT80_Tech_Study3', level:7, type:'sub', once:true,
- trigger:{stats:{MOT:{gte:80}}, items:['tech'], counter:{study:3}}, reward:{TRU:4, MOT:5}},
-{id:'L7_Bath_Calm_Plus', level:7, type:'sub', once:true,
- trigger:{stats:{STR:{gte:35}}, items:['calm'], sequence:['bath','use_calm']}, reward:{STR:-15, MOOD:0.8}},
-{id:'L7_Mood1_Music_Bath_Play', level:7, type:'sub', once:true,
- trigger:{stats:{MOOD:{gte:1}}, items:['music'], sequence:['bath','play']}, reward:{AFF:3, STR:-10}},
-{id:'L7_Recipe_Cook2', level:7, type:'sub', once:true,
- trigger:{items:['recipe'], counter:{dinner_cook:2}}, reward:{AFF:3, TRU:1}},
-{id:'L7_GLD120_DineOut', level:7, type:'sub', once:true,
- trigger:{stats:{GLD:{gte:120}}, sequence:['dinner_dineout']}, reward:{AFF:4, TRU:2}},
-{id:'L7_TRU70_Blanket_Hug', level:7, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:70}}, items:['blanket'], sequence:['rest','hug']}, reward:{AFF:3}},
-{id:'L7_STM30_Tea_Sleep', level:7, type:'sub', once:true,
- trigger:{stats:{STM:{lte:30}}, sequence:['tea','sleep']}, reward:{STR:-5, MOT:3}},
-{id:'L7_StrBelow40_6Days', level:7, type:'sub', once:true,
- trigger:{meta:{strBelow40Streak:6}}, reward:{TRU:5}},
-{id:'L7_MoodNeg_Walk3', level:7, type:'sub', once:true,
- trigger:{stats:{MOOD:{lt:0}}, counter:{walk:3}}, reward:{MOOD:2, TRU:2}},
-{id:'L7_VeryLowRepeat5Days', level:7, type:'sub', once:true,
- trigger:{meta:{lowRepeatStreak:5}}, reward:{TRU:4}}
-,
-
-{id:'L8_DeepTalk_RingLabel', level:8, type:'sub', once:true,
- trigger:{items:['zodiac'], counter:{walk:2}}, reward:{LABEL:'ringBuy'}},
-
-{id:'L8_TRU80_Ring_Talk', level:8, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:80}}, items:['ring'], sequence:['talk']}, reward:{TRU:100}},
-{id:'L8_MOT85_TechExam_Study4', level:8, type:'sub', once:true,
- trigger:{stats:{MOT:{gte:85}}, items:['tech','exam'], counter:{study:4}}, reward:{TRU:5, MOT:6}},
-{id:'L8_STR0to40_Bathsalt_Bath_Tea', level:8, type:'sub', once:true,
- trigger:{stats:{STR:{lte:40}}, items:['bathsalt'], sequence:['bathTogether','tea']}, reward:{TRU:3, AFF:3}},
-{id:'L8_Mood1p5_Film_Play', level:8, type:'sub', once:true,
- trigger:{stats:{MOOD:{gte:1}}, items:['film'], sequence:['play']}, reward:{AFF:4}},
-{id:'L8_Recipe_Bento_Cook_Midnight', level:8, type:'sub', once:true,
- trigger:{items:['recipe','bento'], sequence:['dinner_cook']}, reward:{TRU:3, MOOD:0.5}},
-{id:'L8_GLD150_DineOut_Special', level:8, type:'sub', once:true,
- trigger:{stats:{GLD:{gte:150}}, sequence:['dinner_dineout']}, reward:{TRU:3}},
-{id:'L8_TRU85_Blanket_SleepTogether', level:8, type:'sub', once:true,
- trigger:{stats:{TRU:{gte:85}}, items:['blanket'], sequence:['rest','sleepTogether']}, reward:{TRU:3}},
-{id:'L8_STM35_Walk_Sleep', level:8, type:'sub', once:true,
- trigger:{stats:{STM:{lte:35}}, sequence:['walk','sleep']}, reward:{STR:-5, MOT:4}},
-{id:'L8_StrBelow40_7Days_Mood1', level:8, type:'sub', once:true,
- trigger:{meta:{strBelow40Streak:7, moodAtLeast:1}}, reward:{TRU:6}},
-{id:'L8_LowRepeat5Days_Plus', level:8, type:'sub', once:true,
- trigger:{meta:{lowRepeatStreak:5}}, reward:{TRU:4, AFF:2}}
-
-    ];
-
-  // --- Inlined texts from script.zip ---
-  const TEXTS = {"events": {"L2_Distinct3Cats": "하루 동안 대화, 휴식, 쇼핑 등\n다채로운 활동을 함께하며\n지루할 틈 없는 하루를 보냈다.", "L2_GLD20_Bento_Play_Cook": "함께 신나게 놀고 난 후\n미리 사둔 보온 도시락 통에 직접 만든 요리를 담아주었다.\n그녀는 오늘 하루에 만족한 것 같았고, \n그런 그녀를 보는 당신도 기분이 좋았다.", "L2_MOOD0_Tea_Talk": "날씨 좋은 날,\n함께 차를 마시며 편안한 분위기에서 대화를 나누었다.\n소소하고 평범한 일상을 서로 공유했다.", "L2_MOODneg_Walk": "그녀의 기분이 어딘가 답답하고 안 좋아보여서\n함께 산책하며 기분 전환을 시켜주었다.\n귀가한 후 그녀 표정을 보니 기분이 풀어진 것 같았다.", "L2_MOT30_Recipe_Cook": "내가 요리할 때 그녀가 빤히 지켜보고 있던 것이 신경쓰여\n슈퍼에서 사온 레시피키트로 함께 저녁을 만들어보았다.\n서툴지만 즐거운 요리시간이었다.", "L2_MOT40_Tech_Study": "함께 기술서를 보며 열심히 공부를 했다.\n어려운 문제를 함께 풀면서 서로 조금은 가까워진 기분이 들었다.", "L2_MOT50_Study2in3": "그녀가 공부를 하고 싶어해서\n그 모습이 대견한 당신은\n곁에서 집중적으로 그녀의 공부를 도와줬다.", "L2_STM40_TeaBeforeSleep": "그녀가 피곤해보여서 따뜻한 차를 끓여주고\n편안히 잠들 수 있도록 도와주었다.\n잠든 그녀의 얼굴은  너무 사랑스러워서 무심코 계속 바라보게 되었다.", "L2_STR20_Antidote_Use": "그녀가 많이 피곤하고 지친 것 같아서,\n당신은 그녀에게 피로회복제를 건내주며 걱정해주었다. \n그녀는 당신의 배려에 감동한 것 같았다.", "L2_STR30_Rest": "아직 그녀가 마음을 열지 않은 것 같아서\n아무것도 하지 않고 편안히 쉴 수 있는 시간을 마련해주었다.\n때론 챙겨주는 것보다 아무것도 안 하는게 더 나을 때도 있다.", "L2_TRU5_Talkx2": "당신은 그녀에게 왜 그날 집 앞에 쓰러져 있었는지 물어보았다.\n그녀는 고개를 숙이고 조용히 말했다.\n“…아무 데도 갈 수 없어서… 여기가 마지막일 것 같았어.”\n그녀의 말투엔, 이상하리만치 체념과 오래된 피로가 묻어 있었다.\n말하고 싶지 않은 눈치에, 당신은 더 묻지 않기로 했다.", "L3_GLD50_DineOut": "가끔은 특별한 기분을 내기 위해 근사한 레스토랑에서 외식을 했다.\n평소와 다른 분위기에서 즐기는 저녁.", "L3_MoodNeg_Play_Rest": "우울해하는 그녀의 기분을 풀어주기 위해 함께 놀아준 뒤,\n편안하게 쉴 수 있도록 배려해주었다.", "L3_MOT60_Tech_Study2": "그녀는 공부에 푹 빠진 듯 했다.\n당신은 옆에서 그녀의 공부를 계속 도와줬다.", "L3_Movie_Date": "서점에서 구매한 영화 예매권으로 함께 영화관 데이트를 했다.\n데이트의 설렘이 가득한 순간.", "L3_NoRepeatCats": "매번 새로운 활동을 계획하며 만남이 단조로워지지 않도록 노력했다.\n당신의 노력에 그녀도 즐거워하는 것 같았다.", "L3_Recipe_Super_Cook": "함께 몇 번 요리를 하다보니\n이제는 그녀의 요리도 제법 능숙해졌다.\n함께 요리를 하며 즐거운 저녁 식사를 준비한다.", "L3_STM30_Tea_Sleep": "많이 지쳐 보이는 그녀가 숙면을 취할 수 있도록\n따뜻한 차를 대접하고 재워줬다.", "L3_STR30_Tea_Talk": "그녀가 스트레스로 힘들어하는 모습이 보였다.\n함께 차를 마시며 고민을 들어주고 위로해주었다.\n힘든 일을 터놓아줘서 이 정도로 마음을 열어준 것이 기뻤다.", "L3_STR35_Bath_Calm": "스트레스가 많은 날,\n목욕을 마친 그녀에게 진정팩을 해주며 피로를 풀어주었다.\n당신의 섬세한 케어를 그녀도 알아주었으면 좋겠다.", "L3_TRU15_Talk3": "어느 날, 그녀는 밤하늘을 오래 바라보더니,\n“나는 지금도 가끔 헷갈려… 내가 착각한건 아닌지…”라고 말했다.\n당신은 그게 무슨 뜻인지 물었지만, 그녀는 고개를 저었다.\n말하지 않아도 된다는 듯한. 혹은, 말해봤자 이해받지 못할 거라는 듯한 눈빛이었다.", "L3_Walkx2": "특별한 목적 없이 함께 걷는 시간이 늘어났다.\n나란히 걸으며 나누는 대화 속에서 서로에게 더 익숙해진다.", "L4_Antidote_Use_WalkBuff": "스트레스가 심해 보이는 캐릭터에게 피로회복제를 챙겨주고,\n약 기운이 돌면 같이 산책이라도 가자고 제안하며 세심하게 보살펴주었다.", "L4_Blanket_Rest_Hug": "지쳐서 쉬고 있는 그녀를 따뜻한 담요로 덮어준 뒤,\n말없이 부드럽게 껴안아주었다. \n같은 샴푸와 걑은 바디워시를 쓰고있을 텐데도\n그녀의 몸에서 나는 냄새는 당신을 설레게 하기 충분했다.\n절대 흑심을 품고 안는게 아니라며, 당신은 애써 스스로를 달랬다.", "L4_Film_Play": "함께 즐겁게 노는 순간,\n당신은 필름 카메라를 꺼내 그 모습을 사진으로 남긴다.\n둘만의 소중한 추억이 한 장 더 쌓이는 순간.", "L4_GLD80_DineOut": "돈을 조금 모아서 평소보다 더 근사한 곳으로 외식을 갔다.\n특별한 날을 기념하거나, 서로를 격려하기 위한 멋진 저녁 식사.", "L4_MixedStudyWork3": "공부와 일을 병행하며 바쁘지만 충실한 나날을 보내고 있다.\n서로의 성실한 모습을 보며 미래에 대한 긍정적인 믿음을 갖게 된다", "L4_MoodNeg_Walk_Tea": "기분이 가라앉은 그녀를 데리고 나가 산책으로 바람을 쐬게 한 뒤,\n따뜻한 차를 마시며 마음을 풀어주었다.", "L4_MOT65_Exam_Study2": "중요한 시험을 앞두고 그녀의 공부 의욕이 매우 높다.\n당신은 수험서를 구해 함께 공부하며 든든한 조력자가 되어주었다.\n덕분에 그녀는 시험에 합격했다.", "L4_Recipe_Cook2": "이전에 함께 요리했던 레시피가 마음에 들었는지,\n다시 한번 함께 요리를 한다.\n이제는 제법 손발이 잘 맞는 즐거운 요리 시간", "L4_STM25_SleepNow": "당신의 잦은 공부와 일 등으로 과로로 감기에 걸렸다.\n어떻게 침대에 들어갔는지도 기억나지 않는다.\n그녀는 당신이 걱정이 되었는지 물수건을 올리며 간호해주었다.\n아플 때 혼자가 아니라서 당신은 그녀에게 감사함을 느꼈다.", "L4_TodayAff16Plus": "오늘따라 유난히 애정이 넘치는 하루를 보냈다.\n사소한 행동 하나하나가 서로에게 큰 기쁨이 되었던,\n특별히 행복한 날.", "L4_TRU25_TalkTalkPet": "또 다른 어느 날, 그녀는 망설이다가 조용히 말했다.\n당신은 기억하지 못하겠지만 그녀는 예전부터 당신을 알고 있었다고.\n당신은 어리둥절해서 말을 잇지 못했다.\n그녀는 그 말을 끝으로 아무 설명도 덧붙이지 않았지만,\n그 말은 머릿속에서 자꾸 울려 퍼졌고, 어쩐지 가슴이 이상하게 두근거렸다.", "L5_Film_Play_Photo": "또다시 함께 노는 모습을 사진으로 남긴다.\n차곡차곡 쌓여가는 사진들처럼, \n이제 둘의 추억도 꽤 상당하게 쌓여있어\n잃기 싫은 것이 되었다.", "L5_MoodNeg_Walkx2": "그녀의 기분이 좀처럼 나아지지 않자,\n당신은 며칠에 걸쳐 함께 산책하며 곁을 지켜준다.\n당신의 끈기 있는 위로가 그녀의 마음을 움직였다.", "L5_MOT70_Tech_Study3": "그녀는 공부를 계속 열심히 했고 시험과 자격증도 한 두개 합격하며\n그녀의 동기는 최고조가 되었다.\n당신은 기술서를 활용해 심도 있는 공부를 함께하며 파트너가 되어줬다.", "L5_Movie_Date": "이제 영화관 데이트는 둘만의 즐거운 연례행사처럼 되었다.\n어떤 영화를 볼지 함께 고르며 설레는 시간을 보낸다.", "L5_Recipe_Cook_Kiss": "함께 맛있는 저녁을 만들어 먹은 뒤,\n설거지를 하거나 소파에 앉아 쉬는 등\n평범한 일상 속에서 달콤한 키스를 나눈다.\n당신은 신혼부부 같은 느낌이라고 생각했지만, \n입 밖으로 꺼내진 않았다.", "L5_RepeatDiscipline5Days": "매일 다른 활동을 계획하며 일상이 지루해지지 않도록 노력했다.\n그녀와 함께하는 모든 행동이 너무 즐거워서,\n최대한 여러가지 경험을 하고 싶었다.", "L5_STM40_Rest_Kiss": "피곤해서 쉬고 있는 캐릭터의 곁에 조용히 다가가,\n쉬는 것을 방해하지 않으면서도 애정을 표현하는 가벼운 키스를 해줬다.\n그녀도 싫지 않은 것 같았다.", "L5_STR35_Tea_Kiss": "스트레스 받은 그녀를 위해 차를 끓여주며 위로하고,\n분위기가 무르익자 따뜻한 키스로 위로의 마음을 전했다.\n그녀는 떨어지기 싫은 듯 계속 안겼고 \n촉촉한 눈으로 계속 키스를 졸랐다.\n끝난 후에 시계를 보니 시간이 한참 지나있었다.\n", "L5_StrBelow40_3Days": "그녀와의 관계는 안정적으로 유지되고 있다.\n이 안정이 서로에게 좋은 영향을 주고 있다고 느껴졌다.", "L5_TRU45_Bath_Calm": "목욕 후의 가장 편안한 상태에서 진정팩을 해주며 서로를 케어해주었다.", "L5_Zodiac_Night_WalkTalk": "함께 산책하며 별자리 가이드를 보며 밤하늘의 별들을 찾아본다.\n낭만적인 분위기 속에서 서로의 미래를 이야기했다.", "L6_GLD90_DineOut": "기념일이 있어, 큰맘 먹고 최고급 레스토랑에서 외식을 했다. ", "L6_LowRepeat4Days": "당신은 4일째 새로운 활동을 계획하며 그녀에게\n최고의 시간만을 선물하기 위해 노력하고 있다.\n당신에게 있어서 그녀는 완전히 소중한 존재가 되었다.", "L6_Mood1_Music_Lullaby": "기분 좋은 날, 함께 음악을 들으며 놀다가\n그 음악을 자장가 삼아 함께 잠이 든다.\n행복하고 평화로운 일상의 단면.", "L6_MoodNeg_Walk_Rest": "우울해하는 그녀의 손을 잡고 조용한 곳을 산책한 뒤,\n집에 돌아와 아무 생각 없이 푹 쉴 수 있도록 모든 것을 배려해주었다.", "L6_MOT75_Exam_Study2": "꽤 어렵다고 알려진 커다란 시험이 있다.\n중요한 목표를 향한 그녀의 열정이 절정에 달했다. \n당신은 곁에서 끝까지 함께 밤을 새우며 응원한다.\n합격률이 매우 낮은 시험이었지만, \n왠지 당신은 그녀가 합격할것만 같은 기분이 들었다.", "L6_Recipe_Cook_SleepTogether": "함께 정성껏 저녁을 만들어 먹고,\n뒷정리를 마친 뒤 자연스럽게 함께 잠자리에 들었다.\n마치 부부가 된 것 같은 기분이 들었다.", "L6_STM35_Tea_Sleep": "늦은 밤까지 무리한 그녀를 위해 따뜻한 차를 끓여주고,\n어서 잠자리에 들라며 다정하게 등을 떠밀어줬다.", "L6_STR30_Antidote_Bath": "스트레스를 풀어주기 위해 피로회복제를 챙겨준 뒤,\n이어서 따뜻한 물에 목욕하며\n몸과 마음의 피로를 완전히 씻어낼 수 있도록 도왔다.", "L6_StrBelow40_5Days": "당신의 헌신적인 관리 덕분에 그녀는 매우 행복한 인생을 보내고 있다.\n그녀는 어느날 쪽지로 감사 편지를 남겼다.\n당신과 함께 살 수 있는건 최고의 행운이었다고.", "L6_TRU55_Blanket_SleepTogether": "서로 쉬다가 자연스럽게 한 침대에서 잠이 든다.\n따뜻한 담요 아래에서 서로의 온기를 느끼며 평온한 밤을 보낸다.", "L6_TRU60_TalkTalkPet": "그날 밤, 그녀는 문득 당신의 손을 가만히 잡았다.\n그리고 아주 작고 떨리는 목소리로 물었다.\n“만약 내가 전생의 연인을 다시 만나기 위해 수많은 일들을 거쳐서,\n이렇게 환생해서 만나게 된거라면 믿어줄 수 있을까?”\n말을 마치고 그녀는 눈을 감았지만, 눈꺼풀 너머로 작게 빛나는 눈물이 스쳤다.\n그녀의 말은 당신 마음 어딘가를 뜨겁게 붙잡고 놓아주지 않았다.", "L7_Bath_Calm_Plus": "스트레스가 많은 날,\n목욕으로 긴장을 푼 그녀에게 진정팩을 해주며\n피부와 마음을 동시에 관리해주었다.", "L7_BathTogether_with_Bathsalt": "미리 준비한 향기로운 입욕제를 푼 욕조에서\n함께 목욕하며 하루의 피로를 녹이고 사랑을 속삭였다.", "L7_GLD120_DineOut": "연인으로서 멋있는 모습을 보이고 싶어서\n조금 큰 돈을 들여 분위기 좋은 식당에 예약을 했다.\n당신도 그녀도 처음 먹어보는 요리가 가득했다. \n처음을 함께 할 수 있어서 더욱 인상깊었다.\n\n", "L7_Mood1_Music_Bath_Play": "기분 좋은 날, 함께 목욕하며 장난을 치고\n나온 뒤에도 음악을 틀어놓고 어린아이처럼 순수하게 놀며\n즐거움이 가득한 하루를 보냈다.\n그녀와 함께할 때마다 어린이처럼 즐거워지는 걸 느꼈다.", "L7_MoodNeg_Walk3": "그녀가 우울감에 빠졌을 때마다,\n당신은 포기하지 않고 그녀와 함께 산책하며 곁을 지켰다.\n어떤 어려움도 함께 극복하겠다는 의지의 표현이었다.", "L7_MOT80_Tech_Study3": "그녀는 이제 한 분야의 전문가가 되었고, \n자신의 꿈을 향해 더 앞으로 달려나가고 있다.\n당신은 그 꿈을 적극적으로 응원한다.\n", "L7_Recipe_Cook2": "이제 함께 요리하는 것은 특별한 이벤트가 아닌,\n행복한 일상이 되었다.\n능숙하게 저녁을 준비하며 서로의 하루를 묻는다.", "L7_STM30_Tea_Sleep": "피곤에 지친 그녀를 재우기 위해\n차를 끓여주는 당신의 모습은\n이제 숙련된 간호사나 부모처럼 능숙하고 다정하다.", "L7_StrBelow40_6Days": "", "L7_TRU70_Blanket_Hug": "쉬고 있는 그녀를 담요로 감싸 안아주는 것은\n이제 너무나 자연스러운 행동이다.\n서로는 서로에게 가장 큰 안식처이다.", "L7_VeryLowRepeat5Days": "지루할 틈 없는 나날을 보냈다.\n두 사람의 관계는 항상 새롭고 활기가 넘친다.", "L8_DeepTalk_RingLabel": "밤하늘을 보며 그녀와 나눈 수많은 대화 끝에,\n당신은 확신을 얻는다.\n그녀와 평생을 함께 하고 싶다고.\n", "L8_GLD150_DineOut_Special": "큰 돈이 들어올 일이 생겨서  호화롭게 외식을 했다.", "L8_LowRepeat5Days_Plus": "미래를 약속한 뒤에도 두 사람은 여전히 관계를 새롭게 가꾸기 위해 노력한다.\n당신과 그녀의 사랑은 언제나 현재진행형이다.", "L8_Mood1p5_Film_Play": "더할 나위 없이 행복한 날,\n함께 노는 모습을 또다시 사진으로 남긴다.\n이 사진첩은 두 사람의 사랑의 역사가 될 것이다.", "L8_MOT85_TechExam_Study4": "그녀가 지금까지 이뤄둔 것은 충분히 많았다.\n그녀는 이제 대기업 취업을 준비하고 있다.\n면접을 앞두고, 당신은 모든 자료를 총동원해 그녀의 도전을 함께한다.", "L8_Recipe_Bento_Cook_Midnight": "다음 날 일찍 나가야 할 당신을 위해,\n아침 일찍 함께 요리를 해서 보온 도시락에 정성껏 담아줬다.\n사랑이 묻어나는 도시락이었다.", "L8_STM35_Walk_Sleep": "잠들기 전, 가볍게 동네를 한 바퀴 산책하며 하루를 정리하고,\n집에 돌아와 편안하게 함께 잠자리에 드는 이상적인 부부의 모습.", "L8_STR0to40_Bathsalt_Bath_Tea": "스트레스가 거의 없는 평온한 날,\n함께 입욕제로 목욕을 즐기고 나온 뒤\n따뜻한 차를 마시며 완벽하게 여유로운 휴식을 즐긴다.", "L8_StrBelow40_7Days_Mood1": "두 사람의 생활은 안정적이고 행복한 상태를 유지하고 있다.\n당신과 그녀는 서로를 완벽한 동반자로 생각하고 있다.", "L8_TRU80_Ring_Talk": "당신은 진지한 대화를 청하며 준비한 반지를 꺼낸다.\n그녀는 받자마자 기쁜 듯이 당신에게 안겼고,\n두 사람은 평생을 약속한다.", "L8_TRU85_Blanket_SleepTogether": "두 사람에게 함께 잠드는 것은 숨 쉬는 것처럼 자연스러운 일이다.\n서로는 이제 분리할 수 없는 존재가 되었다."}, "levelup": {"L2": "처음엔 어색한 침묵이 흐르기도 했지만,\n사소한 대화를 나누고 함께 시간을 보내며 서로를 알아갔다.\n어느새 그녀는 나에게 조금씩 마음의 문을 열기 시작했다.\n이제는 곁에서 가만히 머리를 쓰다듬어 주어도 될 것 같다.", "L3": "함께 보내는 시간이 점점 더 특별하게 느껴지기 시작했다.\n단순한 친구가 아니라, 그 이상의 감정이 싹트고 있음을 깨달았다.\n이제는 그녀의 손을 잡고 \"데이트\"라고 말할 용기가 생겼다.\n우리의 첫 데이트는 어떤 모습일까, 마음이 설레기 시작한다.", "L4": "몇 번의 데이트를 거치며 우리는 더욱 가까워졌다.\n말없이 함께 걷는 것만으로도 편안함을 느끼는 사이가 되었다.\n이제는 힘들거나 기쁜 일이 있을 때, 말 대신 따뜻하게 껴안아주고 싶다.\n그녀의 온기를 느끼면, 어떤 어려움도 이겨낼 수 있을 것만 같다.", "L5": "서로를 끌어안는 온기에 익숙해질 무렵, 문득 시선이 마주쳤다.\n수많은 감정이 오가는 그 짧은 순간, 세상이 멈춘 것 같았다.\n더 이상 망설일 필요가 없었다.\n조심스럽게 다가가 그녀의 입술에 나의 마음을 전했다.", "L6": "달콤한 입맞춤은 우리의 일상이 되었다.\n이제 서로의 곁이 아니면 잠들 수 없을 만큼, 존재가 깊숙이 스며들었다.\n늦은 밤 영화를 보다 소파에서 잠든 그녀를 바라보며 생각했다.\n이제는 같은 공간에서, 함께 아침을 맞이하고 싶다고.", "L7": "함께 잠들고, 함께 눈을 뜨는 아침이 반복되었다.\n우리는 서로에게 어떤 모습도 숨길 필요가 없는 사이가 되었다.\n하루의 피로를 씻어내는 시간조차 함께 나누고 싶어졌다.\n따뜻한 물 속에서, 서로의 가장 솔직한 모습을 마주한다.", "L8": "함께 웃고, 울고, 서로를 보듬으며 모든 계절을 보냈다.\n그녀는 나의 일상이자, 나의 세상 그 자체가 되었다.\n이제는 '연인'이라는 이름만으로는 이 감정을 다 담을 수 없었다.\n이제 영원을 약속할 시간이다."}};
-
-
-
-    // ---------------------- UI Wiring ----------------------
-    const el = {
-      day:qs('#lblDay'), time:qs('#lblTime'), timeText:qs('#timeText'), dot:qs('#dot'),
-      level:qs('#lblLevel'),
-      vAFF:qs('#vAFF'), vTRU:qs('#vTRU'), vMOT:qs('#vMOT'), vMOOD:qs('#vMOOD'), vSTR:qs('#vSTR'), vSTM:qs('#vSTM'),
-      bAFF:qs('#bAFF'), bTRU:qs('#bTRU'), bMOT:qs('#bMOT'), bMOOD:qs('#bMOOD'), bSTR:qs('#bSTR'), bSTM:qs('#bSTM'),
-      inv:qs('#inv'),
-      pillMult:qs('#pillMult'), pillGold:qs('#pillGold'), pillRepeat:qs('#pillRepeat'), pillStressTier:qs('#pillStressTier'), pillFlags:qs('#pillFlags'),
-      illu:qs('#illu'), illuImg:qs('#illuImg'), imgMsg:qs('#imgMsg'),
-      actionsMode:qs('#actionsMode'), eventMode:qs('#eventMode'), eventText:qs('#eventText'), btnBack:qs('#btnBack'),
-      dinnerMode:qs('#dinnerMode'), btnCook:qs('#btnCook'), btnDineOut:qs('#btnDineOut'),
-      toast:qs('#toast')
-    };
-    // Reset handler
-    
 (function(){
-  const btnReset = document.getElementById('btnReset');
-  if(!btnReset) return;
-  btnReset.addEventListener('click', ()=>{
-    const ok = confirm('정말로 다시 시작할까요? 저장된 모든 진행 상황이 삭제됩니다.');
-    if(!ok) return;
-    try{
-      const keys=[];
-      for(let i=0;i<localStorage.length;i++){
-        const k = localStorage.key(i);
-        if(!k) continue;
-        if(k==='sim_game_save_v1' || k==='vowed' || k.startsWith('ev_')) keys.push(k);
-      }
-      keys.forEach(k=>localStorage.removeItem(k));
-    }catch(e){}
-    try{ sessionStorage.setItem('skipSave','1'); }catch(e){}
-    location.reload();
-  });
-})();
+  'use strict';
 
+  // ---------- Utilities ----------
+  const clamp = (v, lo, hi)=> Math.max(lo, Math.min(hi, v));
+  const fmt = (n)=> (Math.round(n*100)/100).toString();
+  const $ = (sel)=> document.querySelector(sel);
+  const byId = (id)=> document.getElementById(id);
 
+  // ---------- Resources (images & stories) ----------
+  const IMG = {
+    start: "img/start.png",
+    talk: "img/talk.png",
+    play: "img/play.png",
+    study: "img/study.png",
+    pet: "img/pet.png",
+    hug: "img/hug.png",
+    kiss: "img/kiss.png",
+    rest: "img/rest.png",
+    tea: "img/tea.png",
+    sleep_separate: "img/sleep_separate.png",
+    sleep_together: "img/sleep_together.png",
+    work: "img/work.png",
+    market: "img/shop_super.png",
+    book: "img/shop_book.png",
+    pharm: "img/shop_pharmacy.png",
+    volunteer: "img/volunteer.png",
+    walk: "img/walk.png",
+    date_planetarium: "img/date_planetarium.png",
+    date_cinema: "img/date_cinema.png",
+    date_amusement: "img/date_amusement.png",
+    dinner_cstore: "img/dinner_cstore.png",
+    dinner_cook: "img/dinner_cook.png",
+    dinner_out: "img/dinner_out.png",
+    bath_alone: "img/bath_alone.png",
+    bath_together: "img/bath_together.png",
+    // Story images
+    intro_1:"img/intro_1.png", intro_2:"img/intro_2.png", intro_3:"img/intro_3.png",
+    L2_1:"img/L2_1.png", L2_2:"img/L2_2.png", L2_3:"img/L2_3.png",
+    L3_1:"img/L3_1.png", L3_2:"img/L3_2.png", L3_3:"img/L3_3.png",
+    L4_1:"img/L4_1.png", L4_2:"img/L4_2.png", L4_3:"img/L4_3.png",
+    L5_1:"img/L5_1.png", L5_2:"img/L5_2.png", L5_3:"img/L5_3.png",
+    L6_1:"img/L6_1.png", L6_2:"img/L6_2.png", L6_3:"img/L6_3.png",
+    L7_1:"img/L7_1.png", L7_2:"img/L7_2.png", L7_3:"img/L7_3.png",
+    L8_1:"img/L8_1.png", L8_2:"img/L8_2.png", L8_3:"img/L8_3.png"
+  };
 
-    // Action buttons
-    document.querySelectorAll('[data-act]').forEach(btn=>{
-      btn.addEventListener('click',()=>handleAction(btn.dataset.act));
-    });
-    el.btnBack.addEventListener('click',()=>switchMode('actions'));
-    // Dinner choose buttons
-    document.querySelectorAll('[data-dinner]').forEach(b=>b.addEventListener('click',()=>handleDinner(b.dataset.dinner)));
+  const STORIES = {
+    intro: [
+      "게임시작\\n게임시작\\n게임시작\\n게임시작",
+      "게임시작\\n게임시작\\n게임시작\\n게임시작",
+      "게임시작\\n게임시작\\n게임시작\\n게임시작"
+    ],
+    L2: [
+      "L2레벨업\\nL2레벨업\\nL2레벨업\\nL2레벨업",
+      "L2레벨업\\nL2레벨업\\nL2레벨업\\nL2레벨업",
+      "L2레벨업\\nL2레벨업\\nL2레벨업\\nL2레벨업"
+    ],
+    L3: ["L3레벨업\\nL3레벨업\\nL3레벨업\\nL3레벨업",
+         "L3레벨업\\nL3레벨업\\nL3레벨업\\nL3레벨업",
+         "L3레벨업\\nL3레벨업\\nL3레벨업\\nL3레벨업"],
+    L4: ["L4레벨업\\nL4레벨업\\nL4레벨업\\nL4레벨업",
+         "L4레벨업\\nL4레벨업\\nL4레벨업\\nL4레벨업",
+         "L4레벨업\\nL4레벨업\\nL4레벨업\\nL4레벨업"],
+    L5: ["L5레벨업\\nL5레벨업\\nL5레벨업\\nL5레벨업",
+         "L5레벨업\\nL5레벨업\\nL5레벨업\\nL5레벨업",
+         "L5레벨업\\nL5레벨업\\nL5레벨업\\nL5레벨업"],
+    L6: ["L6레벨업\\nL6레벨업\\nL6레벨업\\nL6레벨업",
+         "L6레벨업\\nL6레벨업\\nL6레벨업\\nL6레벨업",
+         "L6레벨업\\nL6레벨업\\nL6레벨업\\nL6레벨업"],
+    L7: ["L7레벨업\\nL7레벨업\\nL7레벨업\\nL7레벨업",
+         "L7레벨업\\nL7레벨업\\nL7레벨업\\nL7레벨업",
+         "L7레벨업\\nL7레벨업\\nL7레벨업\\nL7레벨업"],
+    L8: ["L8레벨업\\nL8레벨업\\nL8레벨업\\nL8레벨업",
+         "L8레벨업\\nL8레벨업\\nL8레벨업\\nL8레벨업",
+         "L8레벨업\\nL8레벨업\\nL8레벨업\\nL8레벨업"]
+  };
 
-    // ---------------------- Helpers ----------------------
-    function qs(s){return document.querySelector(s)}
-    function randBetween(a,b){return Math.floor(Math.random()*(b-a+1))+a}
-    function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
-    function toast(msg){el.toast.textContent=msg;el.toast.classList.add('show');setTimeout(()=>el.toast.classList.remove('show'),1400)}
+  const STORY_IMGS = {
+    intro: [IMG.intro_1, IMG.intro_2, IMG.intro_3],
+    L2: [IMG.L2_1, IMG.L2_2, IMG.L2_3],
+    L3: [IMG.L3_1, IMG.L3_2, IMG.L3_3],
+    L4: [IMG.L4_1, IMG.L4_2, IMG.L4_3],
+    L5: [IMG.L5_1, IMG.L5_2, IMG.L5_3],
+    L6: [IMG.L6_1, IMG.L6_2, IMG.L6_3],
+    L7: [IMG.L7_1, IMG.L7_2, IMG.L7_3],
+    L8: [IMG.L8_1, IMG.L8_2, IMG.L8_3],
+  };
 
-    
-
-    // --- Resource Floor Lock (GLD/MOT must be >= 0) ---
-    function enforceResourceFloorLock(){
-      const bad = (S.stats.GLD < 0);
-      if(!bad) return false;
-      const reason = (S.stats.GLD < 0) ? '골드가 0 미만' : '';
-      document.querySelectorAll('button').forEach(b=>{ if(b.id!=='btnReset'){ b.disabled = true; } });
-      if(el.imgMsg) el.imgMsg.textContent = `자원 부족: ${reason}. 모든 선택지가 비활성화됩니다.`;
-      if(el.eventText) el.eventText.textContent = '자원 부족으로 진행할 수 없습니다. 저장/새로고침으로 재시작하세요.';
-      return true;
+  // Preload all images (placed into hidden DOM to ensure caching)
+  function preloadAllImages(){
+    const bin = byId('preloadBin');
+    const paths = Object.values(IMG);
+    for(const src of paths){
+      const im = new Image();
+      im.src = src;
+      im.alt = "preload";
+      bin.appendChild(im);
     }
-// ---- Global helper guards moved out of applyStressLocks ----
-function projectedSTMAfterAction(id){
-  const def = ACT[id]; if(!def) return S.stats.STM;
-  let stm = S.stats.STM;
-  let delta = (def.base && typeof def.base[5]==='number') ? def.base[5] : 0;
-  // global extra stamina cost
-  delta -= 2;
-  return stm + delta;
-}
-function isMotLoweringAction(id){
-  const def = ACT[id]; if(!def || !def.base) return false;
-  return (def.base[2]||0) < 0;
-}
-function applyStaminaLocks(){
-  document.querySelectorAll('[data-act]').forEach(btn=>{
-    const id = btn.dataset.act;
-    const wouldNegative = projectedSTMAfterAction(id) < 0;
-    if(wouldNegative){ btn.disabled = true; }
-  });
-}
-function applyMotLocks(){
-  const motZero = S.stats.MOT <= 0;
-  if(!motZero) return;
-  document.querySelectorAll('[data-act]').forEach(btn=>{
-    const id = btn.dataset.act;
-    if(isMotLoweringAction(id)){ btn.disabled = true; }
-  });
-}
-
-
-function resetActionButtons(){
-  // Re-enable all action buttons before re-applying locks/gates
-  document.querySelectorAll('[data-act]').forEach(btn=>{ btn.disabled = false; });
-}
-
-function updateUI(){
-      el.day.textContent = `${S.day}일째`;
-      const timeNames=['아침','낮','저녁'];
-      el.timeText.textContent = timeNames[S.slot];
-      el.dot.className = 'time-dot '+(['dot-morning','dot-day','dot-evening'][S.slot]);
-      // If the lifelong promise event was completed, show vow text instead of level
-      const __vowed = (S.flags && S.flags.vowed) || (typeof isEventDone==='function' && isEventDone('L8_TRU80_Ring_Talk')) || (typeof localStorage!=='undefined' && localStorage.getItem('vowed')==='1');
-      let __label = __vowed ? '💍평생을 약속함' : `Lv.${S.level}`;
-      if(!__vowed && S.level>=2 && S.level<=7){
-        const __done = countLevelEventsDone(S.level);
-        __label += ` ${__done}/5`;
-      }
-      el.level.textContent = __label;
-      // Stats
-      const {AFF,TRU,MOT,MOOD,STR,STM,GLD}=S.stats;
-      el.vAFF.textContent=Math.round(AFF); el.vTRU.textContent=Math.round(TRU); el.vMOT.textContent=Math.round(MOT);
-      el.vMOOD.textContent =(MOOD).toFixed(1); el.vSTR.textContent=Math.round(STR); el.vSTM.textContent=Math.round(STM);
-      el.bAFF.style.width=clamp(AFF/600*100,0,100)+'%';
-      el.bTRU.style.width=clamp(TRU/600*100,0,100)+'%';
-      el.bMOT.style.width=clamp(MOT/100*100,0,100)+'%';
-      el.bMOOD.style.width=clamp((MOOD+2)/4*100,0,100)+'%';
-      el.bSTR.style.width=clamp(STR,0,100)+'%';
-      el.bSTM.style.width=clamp(STM,0,100)+'%';
-      el.pillGold.textContent = `GLD ${Math.round(GLD)}`;
-      // Multipliers
-      const m = 1 + 0.2*MOOD; // mood
-      const s = clamp(1 - STR/100, 0.5, 1.0);
-      el.pillMult.textContent = `배수 m/s ${m.toFixed(2)} / ${s.toFixed(2)}`;
-      // Repeat & stress tier
-      el.pillRepeat.textContent = `연속카테고리 ×${repeatFactor().toFixed(2)}`;
-      el.pillStressTier.textContent = `스트레스 단계: ${stressTierName()}`;
-      // Flags
-      el.pillFlags.textContent = `오늘: 슈퍼${S.flags.visitedSuper?'○':'×'}${isHoliday()?' ・ 휴일':''}`;
-      // Re-enable all action buttons before re-applying gates/locks
-      resetActionButtons();
-            // Unlock buttons by level
-      unlockButtonsByLevel();
-      // Disable forbidden by stress tiers
-      applyStressLocks();
-      // Holiday-only buttons
-      document.querySelectorAll('[data-act="volunteer"],[data-act="walk"],[data-act="date"]').forEach(btn=>{
-        btn.disabled = btn.dataset.act==='date' ? (S.level<3 || !isHoliday()) : !isHoliday();
-      });
-      // Cook & dineout state
-      el.btnCook.disabled = !S.flags.visitedSuper; // cook enable check
-      el.btnDineOut.disabled = !isHoliday();
-      // Inventory chips
-      renderInv();
-          applyStaminaLocks(); applyMotLocks(); enforceResourceFloorLock();
-    }
-
-    
-function renderInv(){
-  const out=[]; 
-  for(const [id,st] of Object.entries(S.inventory)){
-    const left = st.charges==null? '∞' : st.charges;
-    const canUse = ['antidote','bathsalt','calm'].includes(id);
-    out.push(`<button class="tag${canUse?' use':''}" data-use="${id}" title="${st.note||''}">${st.name}${st.charges!=null?`×${left}`:''}</button>`);
   }
-  el.inv.innerHTML = out.join('');
-  // wire usage
-  el.inv.querySelectorAll('.tag.use').forEach(btn=>{
-    btn.addEventListener('click', ()=>useItem(btn.dataset.use));
-  });
-}
 
+  // ---------- State ----------
+  const KEY = 'raisingSimState.v1';
+  const defaultState = {
+    day: 1,
+    timeIndex: 0, // 0 아침, 1 낮, 2 오후, 3 저녁식사, 4 목욕, 5 저녁, 6 밤
+    level: 1,
+    married:false,
+    mode: 'story', // 'story' | 'actions' | 'dinner' | 'bath' | 'shop'
+    story: { stage: 'intro', idx: 0, pendingQueue: [] },
 
-    function unlockButtonsByLevel(){
-      const rules = [
-        ['pet',2],['date',3],['hug',4],['kiss',5],['sleepTogether',6],['bathTogether',7]
-      ];
-      for(const [id,lv] of rules){
-        const btn = document.querySelector(`[data-act="${id}"]`);
-        if(btn) btn.disabled = S.level < lv;
-      }
-    
-      // auto-save on UI refresh
-      saveGame();
-}
+    stats: { AFF:0, TRU:0, MOT:0, MOOD:3, STR:0, STM:100, GLD:100 },
+    counters: {
+      pet:0, hug:0, kiss:0,
+      datePlanetarium:0, dateCinema:0, dateAmusement:0
+    },
+    inventory: {
+      toy:0, mealkit:0, bathbomb:0,
+      movieTicket:0, amusementTicket:0,
+      starGuide:false, ring:false,
+      energyDrink:0, antidepressant:0,
+      problem:0, tealeaf:0
+    },
+    lastImage: IMG.start
+  };
 
-    function stressTier(){
-      const x=S.stats.STR; if(x>=80) return 3; if(x>=60) return 2; if(x>=40) return 1; return 0;
-    }
-    function stressTierName(){return ['정상','T1 예민','T2 과부하','T3 붕괴 직전'][stressTier()]}
+  let S = load() || structuredClone(defaultState);
+  let SHOP = { type:null, title:'', choices:[] };
 
-    function applyStressLocks(){
-      const t = stressTier();
-      const lockIds = new Set();
-      if(t>=1){['kiss','sleepTogether','bathTogether'].forEach(id=>lockIds.add(id));}
-      if(t>=2){['hug','date','walk'].forEach(id=>lockIds.add(id));}
-      if(t>=3){['pet','play','hug','kiss','walk','date','sleepTogether'].forEach(id=>lockIds.add(id));}
-      for(const id of ['pet','hug','kiss','walk','date','sleepTogether']){
-const btn = document.querySelector(`[data-act="${id}"]`);
-        if(btn){
-          const gated = (ACT[id]?.tags?.gatedLevel||99) > S.level;
-          btn.disabled = btn.disabled || lockIds.has(id) || gated;
-        }
-      }
-    }
-
-    function isHoliday(){ // every 5th day is holiday
-      return (S.day % 5) === 0;
-    }
-
-    function repeatFactor(){
-      const c=S.flags.repeatCount; return [1.0,0.75,0.50,0.35][Math.min(c,3)];
-    }
-
-    // ---------------------- Asset Display ----------------------
-    function setIllustration(src, altMsg){
-      el.illuImg.onload = ()=>{el.imgMsg.textContent=''};
-      el.illuImg.onerror = ()=>{
-        el.illuImg.removeAttribute('src');
-        el.imgMsg.textContent = `${src.replace(/^\//,'')} 가(이) 없습니다.`;
-      };
-      el.illuImg.src = src;
-    }
-    // Robust image fallback: try a list of sources in order (e.g., event-level placeholders up to L8)
-    function setIllustrationFallback(srcList){
-      if(!Array.isArray(srcList) || srcList.length===0){ return; }
-      let i=0;
-      const tryNext=()=>{
-        if(i>=srcList.length){
-          el.illuImg.removeAttribute('src');
-          el.imgMsg.textContent = `${srcList[0].replace(/^\//,'')} 가(이) 없습니다.`;
-          return;
-        }
-        el.illuImg.onload = ()=>{ el.imgMsg.textContent=''; };
-        el.illuImg.onerror = ()=>{ i++; tryNext(); };
-        el.illuImg.src = srcList[i];
-      };
-      tryNext();
-    }
-
-
-    // ---------------------- Action Handling ----------------------
-    function handleAction(id){
-      const def=ACT[id]; if(!def){toast('알 수 없는 행동');return}
-      // Click-time guards: stamina and MOT rules
-      if(projectedSTMAfterAction(id) < 0){ toast('STM이 부족해: 이 행동을 하면 기력이 음수가 돼. 다른 행동을 해보자'); return; }
-      if(S.stats.MOT<=0 && isMotLoweringAction(id)){ toast('MOT가 0이야. MOT를 더 낮추는 행동은 할 수 없어'); return; }
-      if (S.stats.GLD<0) { toast('자원 부족으로 진행 불가'); enforceResourceFloorLock(); return; }
-      // Sleep jumps day regardless of slot
-      if(id==='sleep'){ doSleep(); return; }
-
-      // Slot limit check
-      if(S.slot>2){ toast('오늘은 더 이상 행동할 수 없어'); return; }
-
-      // Validate locks
-      if(def.tags?.gatedLevel && S.level<def.tags.gatedLevel){ toast(`Lv.${def.tags.gatedLevel}에서 해금돼`); return; }
-      // Stress locks enforced via disabled btns, but double-check
-      if(isForbiddenByStress(id)){ toast('지금은 하기 어려워…'); return; }
-
-      // Perform base stat change
-      const delta = computeDelta(def,id);
-      applyDelta(delta);
-      S.dayAff += (delta.AFF||0);
-    // Shop handling
-      if(def.tags?.shop){ openShop(def.tags.shop); }
-
-      // Display illustration
-      const imgPath = def.img || `/img/action_${id}.png`;
-      setIllustration(imgPath, '이미지가 없습니다');
-
-      // Push last action
-      pushActHistory(id);
-
-      // Increment slot except shops (shopping still consumes time per spec; keep as consuming)
-      S.slot++;
-
-      // STR>=80: force next rest(s)
-      handleStressForcedRest();
-
-      // Evening auto dinner & bath
-      if(S.slot===3){ openDinnerChooser(); return; }
-
-      // Check sub-events and level-up after each action
-      tryTriggerEvents(id);
-      checkLevelUp();
-
-      updateUI();
-    }
-
-    function isForbiddenByStress(id){
-      const t=stressTier();
-      const forb1=['kiss','sleepTogether'];
-      const forb2=['hug','date','walk'];
-      const forb3=['pet','play','hug','kiss','walk','date','sleepTogether'];
-      if(t>=3 && forb3.includes(id)) return true;
-      if(t>=2 && forb2.includes(id)) return true;
-      if(t>=1 && forb1.includes(id)) return true;
-      return false;
-    }
-
-    
-function computeDelta(def,id){
-      // Base clone
-      let [AFF,TRU,MOT,MOOD,STR,STM,GLD] = def.base;
-
-      // Global difficulty tweaks
-      AFF*=0.85; TRU*=0.85; // gains slightly nerfed
-      if(def.tags?.study||def.tags?.work||def.tags?.affection){ STR += 2; }
-      STM -= 2; // extra stamina cost
-
-      // Mood/Stress multipliers to positive gains only (AFF/TRU/MOT). Negative STR is a reduction and should be multiplied too
-      const m = 1 + 0.2*S.stats.MOOD; // mood multiplier
-      const s = clamp(1 - S.stats.STR/100, 0.5, 1.0);
-
-      AFF = withVariance(AFF * m * s * levelDampen('AFF'));
-      TRU = withVariance(TRU * m * s * levelDampen('TRU'));
-      MOT = withVariance(MOT * m * s);
-
-      // Repeat penalty by category if repeating the same category consecutively
-      if(S.flags.lastCategory===def.cat){ const rf=repeatFactor(); AFF*=rf; TRU*=rf; MOT*=rf; }
-
-      // Synergies
-      if(id==='talk'){
-        if(lastActsAre(['tea'])){ AFF*=1.3; TRU*=1.3; }
-      }
-
-      // Tea item buffs
-      if(id==='tea'){
-        if(S.inventory['tealeaf']?.charges>0){ MOOD += 0.3; consume('tealeaf',1); }
-      }
-      // Music item
-      if(id==='play'){
-        if(S.inventory['music']?.charges>0){ STR -= 2; consume('music',1); }
-      }
-      // Blanket chain: rest→affection
-      if(id==='hug' || id==='pet' || id==='kiss'){
-        if(S._lastWasRestBlanket && S.inventory['blanket']){ STR -= 4; }
-      }
-      // Bathsalt prepared applies to bathTogether, too
-      if(id==='bathTogether' && (S.flags.bathsaltReady||0)>0){
-        STR -= 6; S.flags.bathsaltReady = Math.max(0,S.flags.bathsaltReady-1);
-      }
-
-      return {AFF,TRU,MOT,MOOD,STR,STM,GLD};
-    }
-
-
-    function withVariance(x){
-      // ±20% + crit/fumble
-      const swing = S.rng.swing; let mult=1 + (Math.random()*2-1)*swing;
-      const r=Math.random(); if(r<S.rng.fumble) mult*=0.5; else if(r< S.rng.fumble+S.rng.crit) mult*=1.6;
-      return x*mult;
-    }
-
-    function levelDampen(kind){
-      // Apply dampen if exceeding (threshold-5)
-      const next = LEVEL_THRESH[S.level+1]; if(!next) return 1;
-      const current = S.stats[kind==='AFF'?'AFF':'TRU'];
-      const over = Math.max(0, current - (next-5));
-      if(over<=0) return 1; return 1/(1 + over/60);
-    }
-
-    function applyDelta(d){
-      const st=S.stats;
-      for(const k of ['AFF','TRU','MOT','MOOD','STR','STM','GLD']){
-        st[k] += d[k]||0;
-      }
-      st.MOOD = clamp(st.MOOD, -2, 2);
-      st.STR = clamp(st.STR, 0, 100);
-      st.STM = clamp(st.STM, 0, 100);
-      // (blanket chain handled via pushActHistory)
-    }
-
-    function pushActHistory(id){
-  const act = ACT[id];
-  const cat = act ? act.cat : null;
-  // Only update repeat chain when the action is a normal ACT with a category.
-  if(cat){
-    if(S.flags.lastCategory===cat) S.flags.repeatCount = Math.min(3,S.flags.repeatCount+1);
-    else { S.flags.lastCategory=cat; S.flags.repeatCount=0; }
+  // ---------- Time & Holiday ----------
+  const TIMES = ['아침','낮','오후','저녁식사','목욕','저녁','밤'];
+  function isHoliday(){
+    const r = S.day % 7;
+    return (r===0 || r===6);
   }
-  // Keep recent actions for sequence-based triggers (e.g., 'dinner_cook'), but cap length.
-      S.flags.lastTwoActs.push(id); if(S.flags.lastTwoActs.length>6) S.flags.lastTwoActs.shift();
-      S.maxRepeatCountToday = Math.max(S.maxRepeatCountToday, S.flags.repeatCount);
-      if(id==='super') S.flags.visitedSuper=true;
-      if(id==='rest' && S.inventory['blanket']) S._lastWasRestBlanket = true; else S._lastWasRestBlanket=false;
+
+  function nextTime(){
+    // advance time by one slot
+    S.timeIndex = (S.timeIndex + 1) % TIMES.length;
+    if (S.timeIndex === 0){
+      // new day
+      S.day += 1;
     }
-
-    function lastActsAre(arr){
-      const n=arr.length; if(S.flags.lastTwoActs.length<n) return false;
-      return JSON.stringify(S.flags.lastTwoActs.slice(-n))===JSON.stringify(arr);
+    // Enforce dinner/bath modes
+    if (TIMES[S.timeIndex] === '저녁식사'){
+      S.mode = 'dinner';
+    } else if (TIMES[S.timeIndex] === '목욕'){
+      S.mode = 'bath';
+    } else {
+      if (S.mode !== 'story') S.mode = 'actions';
     }
-
-    
-// ---------------------- Item Use ----------------------
-function useItem(id){
-  if(!S.inventory[id]){ toast('아이템이 없어'); return; }
-  if(id==='antidote'){
-    applyDelta({STR:-25});
-    consume('antidote',1);
-    pushActHistory('use_antidote');
-    tryTriggerEvents('use_antidote');
-    updateUI();
-    toast('해독제 사용! STR -25');
-    return;
   }
-  if(id==='bathsalt'){
-    S.flags.bathsaltReady = (S.flags.bathsaltReady||0)+1;
-    consume('bathsalt',1);
-    pushActHistory('use_bathsalt');
-    toast('입욕제 준비 완료: 다음 목욕에 적용');
-    updateUI();
-    return;
+
+  function skipToNextMorning(){
+    // regardless of current time -> next day morning
+    S.day += 1;
+    S.timeIndex = 0; // 아침
+    if (S.mode !== 'story') S.mode = 'actions';
   }
-  if(id==='calm'){
-    const last = S.flags.lastTwoActs[S.flags.lastTwoActs.length-1];
-    if(last!=='bath' && last!=='bathTogether'){ toast('목욕 직후에 사용해줘'); return; }
-    applyDelta({STR:-10, MOOD:+0.5});
-    consume('calm',1);
-    pushActHistory('use_calm');
-    tryTriggerEvents('use_calm');
-    updateUI();
-    toast('진정팩 사용!');
-    return;
+
+  // ---------- Save/Load ----------
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+  function load(){ try{ const raw = localStorage.getItem(KEY); return raw? JSON.parse(raw): null; }catch(e){ return null; } }
+  function hardReset(){
+    S = structuredClone(defaultState);
+    save();
+    renderAll();
   }
-  toast('이 아이템은 직접 사용할 수 없어');
-}
 
+  // ---------- Effects Helper ----------
+  function applyDelta(delta){
+    const st = S.stats;
+    st.AFF += delta.AFF||0;
+    st.TRU += delta.TRU||0;
+    st.MOT += delta.MOT||0;
+    st.MOOD += delta.MOOD||0;
+    st.STR += delta.STR||0;
+    st.STM += delta.STM||0;
+    st.GLD += delta.GLD||0;
 
-// ---------------------- Shops ----------------------
-    function openShop(kind){
-      const list = SHOP[kind]; if(!list) return;
-      switchMode('event');
-      let html = `【${kind==='super'?'슈퍼':kind==='book'?'서점':'약국'}】\n구매할 아이템을 선택하세요.`;
-      html += "\n\n"+list.map(it=>`- ${it.name} (${it.price}) — ${it.note}`).join("\n");
-      html += "\n\n소지금: "+Math.round(S.stats.GLD);
-      el.eventText.textContent = html;
-      // Replace back button to a picker temporarily
-      el.btnBack.textContent='돌아가기';
-      // Provide quick clickable choices by toast (simple)
-      el.eventText.onclick = ()=>{
-        
-const name = prompt('구매할 아이템 이름을 정확히 입력 (예: 레시피 키트)');
-if(!name) return; 
-const it=list.find(x=>x.name===name); 
-if(!it){toast('목록에 없음'); return;}
-if(it.id==='ring' && !(S.flags.labels && S.flags.labels.ringBuy)){
-  toast('아직 <반지 구입 가능>이 없어… (L8 이벤트로 획득)');
-  return;
-}
-if(S.stats.GLD < it.price){toast('돈이 부족해'); return;}
-S.stats.GLD -= it.price; addItem(it);
-toast(`${it.name} 구입!`); updateUI(); openShop(kind);
+    // Clamp bounds
+    st.MOOD = clamp(st.MOOD, -3, 3);
+    st.STR = clamp(st.STR, 0, 100);
+    st.STM = clamp(st.STM, 0, 100);
+    st.GLD = Math.max(0, Math.round(st.GLD)); // 금액은 정수화
+  }
+  
+  // ---------- Level Check ----------
+  function canLevelUpTo(target){
+    const st=S.stats, c=S.counters, inv=S.inventory;
+    switch(target){
+      case 2: return (st.AFF>=30 && st.TRU>=15 && st.MOT>=5);
+      case 3: return (st.AFF>=100 && st.TRU>=45 && st.MOT>=15 && c.pet>=10);
+      case 4: return (st.AFF>=200 && st.TRU>=100 && st.MOT>=30 && c.dateCinema>=1 && c.dateAmusement>=1 && c.datePlanetarium>=1);
+      case 5: return (st.AFF>=400 && st.TRU>=200 && st.MOT>=50 && c.hug>=5);
+      case 6: return (st.AFF>=500 && st.TRU>=250 && st.MOT>=80 && c.kiss>=3);
+      case 7: return (st.AFF>=800 && st.TRU>=400 && st.MOT>=120 && c.datePlanetarium>=10);
+      case 8: return (st.AFF>=1200 && st.TRU>=600 && st.MOT>=200);
+      default: return false;
+    }
+  }
 
+  function tryLevelUp(){
+    let changed = false;
+    for(let t=S.level+1; t<=8; t++){
+      if (canLevelUpTo(t)){
+        S.level = t;
+        queueLevelStory(t);
+        changed = true;
+        break; // 한 번에 한 레벨씩
       }
     }
+    return changed;
+  }
 
-    function addItem(it){
-      if(!S.inventory[it.id]) S.inventory[it.id] = {name:it.name, charges:it.charges, note:it.note};
-      else if(S.inventory[it.id].charges!=null) S.inventory[it.id].charges += (it.charges||0);
+  function queueLevelStory(newLevel){
+    if (newLevel>=2){
+      S.story.pendingQueue.push('L'+newLevel);
+      // story 모드로 진입
+      if (S.mode !== 'story'){
+        S.story.stage = S.story.pendingQueue.shift();
+        S.story.idx = 0;
+        S.mode = 'story';
+        setStoryFrame();
+      }
     }
-    function consume(id,n){
-      const st=S.inventory[id]; if(!st) return; if(st.charges==null) return; st.charges=Math.max(0,st.charges-n);
-      if(st.charges===0) delete S.inventory[id];
+  }
+
+  // ---------- Story ----------
+  function setStoryFrame(){
+    const stage = S.story.stage;
+    if(!stage) return;
+    const text = (STORIES[stage]||['', '', ''])[S.story.idx] || '';
+    const img = (STORY_IMGS[stage]||['', '', ''])[S.story.idx] || IMG.start;
+    byId('novelText').innerText = text;
+    setImage(img);
+    save();
+    renderAll();
+  }
+
+  function nextStory(){
+    const stage = S.story.stage;
+    const arr = STORIES[stage] || [];
+    if (S.story.idx < arr.length-1){
+      S.story.idx += 1;
+      setStoryFrame();
+    } else {
+      // 끝, 다음 큐가 있으면 이어서, 없으면 행동으로
+      if (S.story.pendingQueue.length>0){
+        S.story.stage = S.story.pendingQueue.shift();
+        S.story.idx = 0;
+        setStoryFrame();
+      } else {
+        S.mode = 'actions';
+        S.story.stage = null;
+        save();
+        renderAll();
+      }
     }
+  }
 
-    // ---------------------- Dinner & Bath (auto at evening) ----------------------
-    function openDinnerChooser(){
-      switchMode('dinner');
-      setIllustration('/img/dinner.png');
-    }
+  // ---------- Image ----------
+  function setImage(src){
+    S.lastImage = src;
+    byId('heroImg').src = src;
+  }
 
-    function handleDinner(kind){
-      if (S.stats.GLD<0) { toast('자원 부족으로 진행 불가'); enforceResourceFloorLock(); return; }
-      // base effects from spec
-      const K={
-        conbini:{AFF:1,TRU:0,MOT:0,MOOD:0,STR:-2,STM:+8,GLD:randBetween(-12,-8), img:'/img/dinner_conbini.png'},
-        cook:{AFF:3,TRU:2,MOT:0,MOOD:0.5,STR:-4,STM:+8,GLD:randBetween(-18,-10), img:'/img/dinner_cook.png'},
-        dineout:{AFF:5,TRU:2,MOT:0,MOOD:1,STR:-4,STM:-8,GLD:randBetween(-50,-25), img:'/img/dinner_out.png'}
-      };
-      if(kind==='cook' && !S.flags.visitedSuper){ toast('오늘은 슈퍼를 다녀오지 않아 직접 요리 불가'); return; }
-      if(kind==='dineout' && !isHoliday()){ toast('외식은 휴일에만 가능'); return; }
-      const d=K[kind]; applyDelta(d); setIllustration(d.img);
-      pushActHistory('dinner_'+kind);
-      // Explicitly hide dinner chooser to avoid overlay sticking
-      el.dinnerMode.classList.add('hidden');
-      // Mark sequences for event engine
-      if(kind==='cook') addCounter('dinner_cook');
-
-      // After dinner → auto bath
-      handleBath();
-      // Safety: if for any reason UI didn't advance to next day/actions or event, ensure actions are visible.
+  // ---------- Inventory / Shop ----------
+  function renderInventory(){
+    const inv = S.inventory;
+    const chips = [];
+    function chip(label, val, canUse, onUse, hint){
+      const id = 'chip_'+label.replace(/[^a-zA-Z0-9]/g,'_');
+      const btn = canUse? `<button data-chip="${id}">사용</button>`:'';
+      const tip = hint? `<span style="color:var(--muted)">${hint}</span>`:'';
+      chips.push(`<span class="chip" id="${id}"><strong>${label}</strong> × ${val} ${btn} ${tip}</span>`);
       setTimeout(()=>{
-        try{
-          if(!el.eventMode.classList.contains('hidden')) return; // allow events to take precedence
-          switchMode('actions');
-        }catch(e){}
+        const el = document.querySelector(`[data-chip="${id}"]`);
+        if (el){ el.addEventListener('click', onUse); }
       }, 0);
     }
 
-    function handleBath(){
-      // Bath: single or together if unlocked (auto chooses single; together is manual action elsewhere)
-      const bath = {AFF:0,TRU:0,MOT:0,MOOD:0.8,STR:-12,STM:+12,GLD:randBetween(-3,0)};
-       // Apply bathsalt if prepared
-      if((S.flags.bathsaltReady||0)>0){ bath.STR -= 6; S.flags.bathsaltReady = Math.max(0,S.flags.bathsaltReady-1); }
-      applyDelta(bath); setIllustration('/img/bath.png'); pushActHistory('bath');
+    // Consumables
+    chip('장난감', inv.toy||0, false, null, '');
+    chip('문제지', inv.problem||0, false, null, '');
+    chip('찻잎', inv.tealeaf||0, false, null, '');
+    chip('밀키트', inv.mealkit||0, false, null, '');
+    chip('배스밤', inv.bathbomb||0, false, null, '');
+    chip('영화티켓', inv.movieTicket||0, false, null, '');
+    chip('유원지티켓', inv.amusementTicket||0, false, null, '');
+    chip('피로회복제', inv.energyDrink||0, (inv.energyDrink||0)>0, ()=>{
+      inv.energyDrink -= 1;
+      applyDelta({STM:+100});
+      save(); renderAll();
+    }, '클릭 시 STM+100');
 
-      // End of day: upkeep & next day
-      endOfDay();
+    chip('항우울제', inv.antidepressant||0, (inv.antidepressant||0)>0, ()=>{
+      inv.antidepressant -= 1;
+      applyDelta({STR:-100});
+      save(); renderAll();
+    }, '클릭 시 STR-100');
+
+    // Permanents
+    chips.push(`<span class="chip"><strong>별자리가이드</strong> ${inv.starGuide? '보유':'미보유'}</span>`);
+    chips.push(`<span class="chip"><strong>반지</strong> ${inv.ring? '보유':'미보유'}</span>`);
+
+    byId('inventoryChips').innerHTML = chips.join('');
+  }
+
+  /* ---------- Shop (Button-based) ---------- */
+  function openShop(type, title, choices){
+    SHOP.type = type; SHOP.title = title; SHOP.choices = choices;
+    S.mode = 'shop';
+    save(); renderAll();
+  }
+
+  function openMarket(){
+    applyDelta({STR:-2, STM:-6});
+    setImage(IMG.market);
+    const choices = [
+      {k:'tealeaf',  name:'찻잎',   price:15, add:3},
+      {k:'bathbomb', name:'배스밤', price:20, add:3},
+      {k:'mealkit',  name:'밀키트', price:20, add:3},
+      {k:'toy',      name:'장난감', price:20, add:3},
+    ];
+    openShop('market','슈퍼', choices);
+  }
+
+  function openBookstore(){
+    applyDelta({STR:-1, STM:-4});
+    setImage(IMG.book);
+    const choices = [
+      {k:'problem',        name:'문제지',       price:12,  add:3},
+      {k:'movieTicket',    name:'영화티켓',     price:24,  add:3},
+      {k:'amusementTicket',name:'유원지티켓',   price:36,  add:3},
+      {k:'starGuide',      name:'별자리가이드', price:50,  add:1, permanent:true},
+      {k:'ring',           name:'반지',         price:1000,add:1, permanent:true, requireLevel:8},
+    ];
+    openShop('book','서점', choices);
+  }
+
+  function openPharmacy(){
+    applyDelta({STR:-15, STM:0});
+    setImage(IMG.pharm);
+    const choices = [
+      {k:'energyDrink',   name:'피로회복제', price:100, add:1},
+      {k:'antidepressant',name:'항우울제',   price:100, add:1},
+    ];
+    openShop('pharm','약국', choices);
+  }
+
+  function renderShopPanel(){
+    if (S.mode !== 'shop') return;
+    const note = byId('shopNote');
+    const box  = byId('shopButtons');
+    note.textContent = `${SHOP.title}에서 무엇을 살까? (보유 GLD: ${S.stats.GLD})`;
+
+    box.innerHTML = '';
+    SHOP.choices.forEach((c, idx)=>{
+      const btn = document.createElement('button');
+      btn.id = `shopChoice_${idx}`;
+      let label = `${c.name} (GLD ${c.price})`;
+      if (!c.permanent){ label += ` +${c.add}`; }
+      if (c.permanent){ label += ' · 영구'; }
+      if (c.requireLevel){ label += ` · L${c.requireLevel}+`; }
+
+      btn.textContent = label;
+
+      let canBuy = true;
+      let reason = [];
+      if (S.stats.GLD < c.price) { canBuy = false; reason.push('GLD 부족'); }
+      if (c.requireLevel && S.level < c.requireLevel) { canBuy = false; reason.push(`L${c.requireLevel}+ 필요`); }
+      if (c.permanent && S.inventory[c.k]) { canBuy = false; reason.push('이미 보유'); }
+
+      btn.disabled = !canBuy;
+      btn.title = canBuy ? '' : reason.join(', ');
+
+      btn.addEventListener('click', ()=>{
+        if (S.stats.GLD >= c.price) {
+            S.stats.GLD -= c.price;
+            if (c.permanent) {
+                S.inventory[c.k] = true;
+            } else {
+                S.inventory[c.k] = (S.inventory[c.k] || 0) + (c.add || 1);
+            }
+            alert(`${c.name} 구매 완료!`);
+            renderShopPanel(); // Refresh shop UI after purchase
+        } else {
+            alert('GLD가 부족합니다.');
+        }
+      });
+      box.appendChild(btn);
+    });
+  }
+
+  function exitShop(){
+    nextTime();
+    S.mode = 'actions';
+    save(); renderAll();
+  }
+
+  // ---------- Action Execution ----------
+  function perform(actionId){
+    const st = S.stats, inv=S.inventory, c=S.counters;
+    if (S.mode !== 'actions') return;
+
+    const A = {
+      talk: ()=>{
+        if (!checkBtn('actTalk')) return;
+        applyDelta({AFF:+3, TRU:+2, MOT:+0, MOOD:+0.5, STR:-2, STM:-5, GLD:0});
+        setImage(IMG.talk);
+        if (inv.ring && !S.married){ S.married = true; alert('관계가 "부부"로 승급됐어!'); }
+        nextTime();
+      },
+      play: ()=>{
+        if (!checkBtn('actPlay')) return;
+        inv.toy -= 1;
+        applyDelta({AFF:+5, TRU:+0, MOT:+3, MOOD:+1, STR:-1, STM:-12, GLD:-3});
+        setImage(IMG.play);
+        nextTime();
+      },
+      study: ()=>{
+        if (!checkBtn('actStudy')) return;
+        inv.problem -= 1;
+        applyDelta({AFF:+0, TRU:+2, MOT:+8, MOOD:-0.5, STR:+6, STM:-15, GLD:0});
+        setImage(IMG.study);
+        nextTime();
+      },
+      pet: ()=>{
+        if (!checkBtn('actPet')) return;
+        applyDelta({AFF:+4, TRU:+2, MOT:-2, MOOD:+1, STR:-6, STM:-4, GLD:0});
+        c.pet+=1; setImage(IMG.pet); nextTime();
+      },
+      hug: ()=>{
+        if (!checkBtn('actHug')) return;
+        applyDelta({AFF:+7, TRU:+3, MOT:-3, MOOD:+1.2, STR:-10, STM:-6, GLD:0});
+        c.hug+=1; setImage(IMG.hug); nextTime();
+      },
+      kiss: ()=>{
+        if (!checkBtn('actKiss')) return;
+        applyDelta({AFF:+11, TRU:+3, MOT:-5, MOOD:+1.5, STR:-8, STM:-6, GLD:0});
+        c.kiss+=1; setImage(IMG.kiss); nextTime();
+      },
+      rest: ()=>{
+        applyDelta({AFF:+0, TRU:+0, MOT:+0, MOOD:+0.5, STR:-12, STM:+40, GLD:0});
+        setImage(IMG.rest); nextTime();
+      },
+      tea: ()=>{
+        if (!checkBtn('actTea')) return;
+        inv.tealeaf -= 1;
+        applyDelta({AFF:+1, TRU:+1, MOT:+0, MOOD:+0.7, STR:-8, STM:+20, GLD:-5});
+        setImage(IMG.tea); nextTime();
+      },
+      sleep_sep: ()=>{
+        applyDelta({AFF:+0, TRU:+0, MOT:+2, MOOD:+0, STR:-15, STM:+60, GLD:0});
+        setImage(IMG.sleep_separate); skipToNextMorning();
+      },
+      sleep_tog: ()=>{
+        if (!checkBtn('actSleepTog')) return;
+        applyDelta({AFF:+4, TRU:+3, MOT:+4, MOOD:+1, STR:-20, STM:+70, GLD:0});
+        setImage(IMG.sleep_together); skipToNextMorning();
+      },
+      work: ()=>{
+        if (!checkBtn('actWork')) return;
+        applyDelta({AFF:+0, TRU:+1, MOT:-2, MOOD:-0.5, STR:+12, STM:-18, GLD:+40});
+        setImage(IMG.work); nextTime();
+      },
+      market: ()=>{ if (!checkBtn('actMarket')) return; openMarket(); },
+      book:   ()=>{ if (!checkBtn('actBook')) return; openBookstore(); },
+      pharm:  ()=>{ if (!checkBtn('actPharm')) return; openPharmacy(); },
+      volunteer: ()=>{
+        if (!checkBtn('actVolunteer')) return;
+        applyDelta({AFF:+0, TRU:+4, MOT:+10, MOOD:+0.5, STR:+10, STM:-20, GLD:0});
+        setImage(IMG.volunteer); nextTime();
+      },
+      walk: ()=>{
+        if (!checkBtn('actWalk')) return;
+        applyDelta({AFF:+3, TRU:+1, MOT:+2, MOOD:+0.8, STR:-6, STM:-10, GLD:0});
+        setImage(IMG.walk); nextTime();
+      },
+      date_planetarium: ()=>{
+        if (!checkBtn('actPlanetarium')) return;
+        applyDelta({AFF:+10, TRU:+4, MOT:+3, MOOD:+1.2, STR:-6, STM:-14, GLD:0});
+        c.datePlanetarium += 1; setImage(IMG.date_planetarium); nextTime();
+      },
+      date_cinema: ()=>{
+        if (!checkBtn('actCinema')) return;
+        inv.movieTicket -= 1;
+        applyDelta({AFF:+15, TRU:+5, MOT:+4, MOOD:+2.4, STR:-12, STM:-20, GLD:-25});
+        c.dateCinema += 1; setImage(IMG.date_cinema); nextTime();
+      },
+      date_amusement: ()=>{
+        if (!checkBtn('actAmusement')) return;
+        inv.amusementTicket -= 1;
+        applyDelta({AFF:+20, TRU:+6, MOT:+5, MOOD:+3.6, STR:-18, STM:-26, GLD:-60});
+        c.dateAmusement += 1; setImage(IMG.date_amusement); nextTime();
+      },
+    };
+
+    const fn = A[actionId];
+    if (fn){ fn(); }
+    tryLevelUp();
+    save();
+    renderAll();
+  }
+
+  // Dinner & Bath execution
+  function doDinner(kind){
+    if (kind==='cstore'){
+      applyDelta({AFF:+1, TRU:+0, MOT:+0, MOOD:+0, STR:-2, STM:+8, GLD:-18});
+      setImage(IMG.dinner_cstore);
+    } else if (kind==='cook'){
+      S.inventory.mealkit -= 1;
+      applyDelta({AFF:+3, TRU:+2, MOT:+0, MOOD:+0.5, STR:-4, STM:+8, GLD:-8});
+      setImage(IMG.dinner_cook);
+    } else if (kind==='out'){
+      applyDelta({AFF:+5, TRU:+2, MOT:+0, MOOD:+1, STR:-4, STM:+16, GLD:-50});
+      setImage(IMG.dinner_out);
     }
+    S.timeIndex = 4; S.mode = 'bath';
+    save(); renderAll();
+  }
 
+  function doBath(kind){
+    if (kind==='solo'){
+      applyDelta({AFF:+0, TRU:+0, MOT:+0, MOOD:+0.8, STR:-12, STM:+12, GLD:-3});
+      setImage(IMG.bath_alone);
+    } else if (kind==='together'){
+      S.inventory.bathbomb -= 1;
+      applyDelta({AFF:+6, TRU:+4, MOT:+2, MOOD:+1.3, STR:-18, STM:+12, GLD:-3});
+      setImage(IMG.bath_together);
+    }
+    S.timeIndex = 5; S.mode = 'actions';
+    tryLevelUp();
+    save(); renderAll();
+  }
+
+  // ---------- Buttons Availability ----------
+  function setBtnEnabled(id, enabled, reason){
+    const el = byId(id);
+    if (!el) return;
+    el.disabled = !enabled;
+    el.title = enabled? '' : (reason||'조건 미충족');
+  }
+
+  function checkBtn(id){
+    return !byId(id)?.disabled;
+  }
+
+  function refreshAvailability(){
+    const st=S.stats, inv=S.inventory, lvl=S.level, mood=st.MOOD, str=st.STR, stm=st.STM;
+    const holiday = isHoliday();
+
+    setBtnEnabled('actTalk', (lvl>=1 && stm>=5 && str<=80 && mood>=-1.9), 'L1+, STM≥5, STR≤80, MOOD≥-1.9');
+    setBtnEnabled('actPlay', (lvl>=1 && stm>=12 && str<=80 && mood>=-1.9 && (inv.toy||0)>=1 && st.GLD>=3), 'L1+, STM≥12, STR≤80, MOOD≥-1.9, 장난감≥1, GLD≥3');
+    setBtnEnabled('actStudy', (lvl>=1 && stm>=15 && str<=80 && mood>=-1.9 && (inv.problem||0)>=1), 'L1+, STM≥15, STR≤80, MOOD≥-1.9, 문제지≥1');
+
+    setBtnEnabled('actPet', (lvl>=2 && st.MOT>=2 && stm>=4 && str<=80 && mood>=-1.9), 'L2+, MOT≥2, STM≥4, STR≤80, MOOD≥-1.9');
+    setBtnEnabled('actHug', (lvl>=4 && st.MOT>=3 && stm>=6 && str<=60 && mood>=-1.5), 'L4+, MOT≥3, STM≥6, STR≤60, MOOD≥-1.5');
+    setBtnEnabled('actKiss', (lvl>=5 && st.MOT>=5 && stm>=6 && str<=40 && mood>=-1.0), 'L5+, MOT≥5, STM≥6, STR≤40, MOOD≥-1.0');
+
+    setBtnEnabled('actRest', true, '');
+    setBtnEnabled('actTea', (lvl>=1 && st.GLD>=5 && (inv.tealeaf||0)>=1), 'L1+, GLD≥5, 찻잎≥1');
+    setBtnEnabled('actSleepSep', true, '');
+    setBtnEnabled('actSleepTog', (lvl>=6 && str<=40 && mood>=-1.0), 'L6+, STR≤40, MOOD≥-1.0');
+
+    setBtnEnabled('actWork', (lvl>=1 && st.MOT>=2 && stm>=18), 'L1+, MOT≥2, STM≥18');
+
+    setBtnEnabled('actMarket', (lvl>=1 && stm>=6), 'L1+, STM≥6');
+    setBtnEnabled('actBook', (lvl>=1 && stm>=4), 'L1+, STM≥4');
+    setBtnEnabled('actPharm', (lvl>=1), 'L1+');
+
+    const canVolunteer = holiday && lvl>=1 && stm>=20 && str<=60 && mood>=-1.5;
+    setBtnEnabled('actVolunteer', canVolunteer, '휴일, L1+, STM≥20, STR≤60, MOOD≥-1.5');
+    const canWalk = holiday && lvl>=1 && stm>=10 && str<=80;
+    setBtnEnabled('actWalk', canWalk, '휴일, L1+, STM≥10, STR≤80');
+    const canPlanet = holiday && lvl>=3 && stm>=14 && str<=60 && mood>=-1.5 && inv.starGuide;
+    setBtnEnabled('actPlanetarium', canPlanet, '휴일, L3+, STM≥14, STR≤60, MOOD≥-1.5, 별자리가이드 보유');
+    const canCinema = holiday && lvl>=3 && stm>=20 && str<=60 && mood>=-1.5 && st.GLD>=25 && (inv.movieTicket||0)>=1;
+    setBtnEnabled('actCinema', canCinema, '휴일, L3+, STM≥20, STR≤60, MOOD≥-1.5, GLD≥25, 영화티켓≥1');
+    const canAmuse = holiday && lvl>=3 && stm>=26 && str<=60 && mood>=-1.5 && st.GLD>=60 && (inv.amusementTicket||0)>=1;
+    setBtnEnabled('actAmusement', canAmuse, '휴일, L3+, STM≥26, STR≤60, MOOD≥-1.5, GLD≥60, 유원지티켓≥1');
+
+    setBtnEnabled('btnDinnerCStore', (st.GLD>=18), 'GLD≥18');
+    setBtnEnabled('btnDinnerCook', (st.GLD>=8 && (inv.mealkit||0)>=1), 'GLD≥8, 밀키트≥1');
+    setBtnEnabled('btnDinnerOut', (holiday && st.GLD>=50), '휴일, GLD≥50');
+
+    setBtnEnabled('btnBathSolo', (st.GLD>=3), 'GLD≥3');
+    setBtnEnabled('btnBathTogether', (lvl>=7 && st.GLD>=3 && str<=40 && mood>=-1.0 && (inv.bathbomb||0)>=1), 'L7+, GLD≥3, STR≤40, MOOD≥-1.0, 배스밤≥1');
+  }
+
+  // ---------- Render ----------
+  function renderAll(){
+    byId('dayText').innerText = `${S.day}일째`;
+    byId('timeText').innerText = TIMES[S.timeIndex];
+    byId('levelText').innerText = `L${S.level}`;
+    byId('marriedTag').classList.toggle('hidden', !S.married);
+    byId('holidayTag').textContent = isHoliday()? '휴일':'평일';
+    byId('holidayTag').classList.toggle('holiday', isHoliday());
+
+    byId('s_aff').innerText = fmt(S.stats.AFF);
+    byId('s_tru').innerText = fmt(S.stats.TRU);
+    byId('s_mot').innerText = fmt(S.stats.MOT);
+    byId('s_mood').innerText = fmt(S.stats.MOOD);
+    byId('s_str').innerText = fmt(S.stats.STR);
+    byId('s_stm').innerText = fmt(S.stats.STM);
+    byId('s_gld').innerText = fmt(S.stats.GLD);
+
+    byId('heroImg').src = S.lastImage || IMG.start;
+
+    const panels = {
+      novel: byId('novelPanel'),
+      actions: byId('actionGroups'),
+      dinner: byId('dinnerPanel'),
+      bath: byId('bathPanel'),
+      shop: byId('shopPanel')
+    };
+
+    Object.values(panels).forEach(p => p.classList.add('hidden'));
+
+    let title = '';
+    if (S.mode === 'story') {
+      panels.novel.classList.remove('hidden');
+      title = '에피소드';
+    } else if (S.mode === 'dinner') {
+      panels.dinner.classList.remove('hidden');
+      title = '저녁 식사 선택';
+    } else if (S.mode === 'bath') {
+      panels.bath.classList.remove('hidden');
+      title = '목욕 선택';
+    } else if (S.mode === 'shop') {
+      panels.shop.classList.remove('hidden');
+      title = `상점: ${SHOP.title}`;
+      renderShopPanel();
+    } else { // actions
+      panels.actions.classList.remove('hidden');
+      title = '행동 선택';
+    }
+    byId('modeTitle').textContent = title;
     
-function endOfDay(){
-      // Daily life cost
-      S.stats.GLD -= 8;
-      let nextMoodPenalty=false; if(S.stats.GLD<0){ nextMoodPenalty=true; }
-      // Streak updates
-      if(S.maxRepeatCountToday<=1) S.daysLowRepeatStreak++; else S.daysLowRepeatStreak=0;
-      if(S.stats.STR<40) S.daysStrBelow40Streak++; else S.daysStrBelow40Streak=0;
-      // Reset today flags
-      S.flags.visitedSuper=false; S.flags.lastCategory=null; S.flags.repeatCount=0; S.flags.lastTwoActs=[]; S.flags.forcedRest=0;
-      // Reset day trackers
-      S.dayAff=0; S.maxRepeatCountToday=0;
-      // Advance day
-      S.day++; S.slot=0;
-      // Apply next-day penalties if any
-      if(nextMoodPenalty){ S.stats.MOOD = clamp(S.stats.MOOD-1,-2,2); S.stats.TRU = Math.max(0,S.stats.TRU-1); }
-      // Daily regen small?
-      updateUI(); switchMode('actions');
-      // Check events/level
-      tryTriggerEvents('dayEnd'); checkLevelUp();
-    }
+    byId('holidayGroup').style.display = isHoliday()? 'block':'none';
+    renderInventory();
+    refreshAvailability();
+  }
 
+  // ---------- Event Bindings ----------
+  function bind(){
+    byId('btnNextNovel').addEventListener('click', nextStory);
+    
+    document.getElementById('actionGroups').addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON' && e.target.id.startsWith('act')) {
+            const actionId = e.target.id.replace('act', '').toLowerCase();
+            const simpleMap = {
+                talk: 'talk', play: 'play', study: 'study', pet: 'pet', hug: 'hug', kiss: 'kiss',
+                rest: 'rest', tea: 'tea', sleepsep: 'sleep_sep', sleeptog: 'sleep_tog',
+                work: 'work', market: 'market', book: 'book', pharm: 'pharm',
+                volunteer: 'volunteer', walk: 'walk', planetarium: 'date_planetarium',
+                cinema: 'date_cinema', amusement: 'date_amusement'
+            };
+            const finalActionId = simpleMap[actionId];
+            if (finalActionId) {
+                perform(finalActionId);
+            }
+        }
+    });
 
-    function doSleep(){
-      setIllustration('/img/action_sleep.png');
-      // jump to next day immediately
-      applyDelta({AFF:0,TRU:0,MOT:2,MOOD:0,STR:-15,STM:+60,GLD:0});
-      endOfDay();
-    }
+    byId('btnDinnerCStore').addEventListener('click', ()=> checkBtn('btnDinnerCStore') && doDinner('cstore'));
+    byId('btnDinnerCook').addEventListener('click', ()=> checkBtn('btnDinnerCook') && doDinner('cook'));
+    byId('btnDinnerOut').addEventListener('click', ()=> checkBtn('btnDinnerOut') && doDinner('out'));
 
-    function handleStressForcedRest(){
-  // Force auto rest only when STR is extremely high (>=95)
-  if(S.stats.STR >= 95){
-    S.flags.forcedRest = Math.max(S.flags.forcedRest, 1);
+    byId('btnBathSolo').addEventListener('click', ()=> checkBtn('btnBathSolo') && doBath('solo'));
+    byId('btnBathTogether').addEventListener('click', ()=> checkBtn('btnBathTogether') && doBath('together'));
+
+    byId('btnShopCancel').addEventListener('click', ()=> exitShop());
+
+    byId('btnQuickSave').addEventListener('click', ()=>{ save(); alert('저장했어.'); });
+    byId('btnQuickLoad').addEventListener('click', ()=>{
+      const L = load();
+      if (L){ S=L; renderAll(); alert('불러왔어.'); } else { alert('세이브 데이터가 없어.'); }
+    });
+    byId('btnRestart').addEventListener('click', ()=>{
+      if (confirm('정말 다시 시작할까? 저장 데이터가 모두 초기화돼.')){ 
+        localStorage.removeItem(KEY); 
+        hardReset(); 
+        alert('새 게임을 시작했어.'); 
+      }
+    });
+
+    window.addEventListener('resize', refreshAvailability);
+    document.addEventListener('visibilitychange', ()=>{ if (!document.hidden) refreshAvailability(); });
+  }
+
+  // ---------- Initial ----------
+  preloadAllImages();
+  bind();
+
+  if (!load()){
+    S.mode='story';
+    S.story.stage='intro';
+    S.story.idx=0;
+    setStoryFrame();
   } else {
-    return;
+    renderAll();
   }
-  if(S.flags.forcedRest>0 && S.slot<3){
-    const def=ACT['rest']; const d=computeDelta(def,'rest');
-    applyDelta(d); setIllustration(def.img); pushActHistory('rest');
-    S.slot++; S.flags.forcedRest--; toast('극심한 스트레스로 자동 휴식!');
-  }
-}
+  
+  save();
 
-    function switchMode(which){
-      el.actionsMode.classList.add('hidden'); el.eventMode.classList.add('hidden'); el.dinnerMode.classList.add('hidden');
-      if(which==='actions') el.actionsMode.classList.remove('hidden');
-      else if(which==='event'){ el.eventMode.classList.remove('hidden'); }
-      else if(which==='dinner'){ el.dinnerMode.classList.remove('hidden'); }
-      updateUI();
-    }
-
-    // ---------------------- Event Engine ----------------------
-    const counters={};
-// Per-level counters: only actions performed after entering a given level are counted for that level.
-const lvlCounters={};
-function addLevelCounter(k, lvl){
-  lvl = (lvl==null ? S.level : lvl);
-  if(!lvlCounters[lvl]) lvlCounters[lvl] = {};
-  lvlCounters[lvl][k] = (lvlCounters[lvl][k]||0) + 1;
-}
-function addCounter(k){
-  // Keep legacy global counters for meta checks, but also track per-level for event counters.
-  counters[k]=(counters[k]||0)+1;
-  addLevelCounter(k, S.level);
-}
-
-    function tryTriggerEvents(lastId){
-      // meta tracking
-      addCounter(lastId);
-      if(lastId==='study'){ addCounter('study_last3'); }
-      if(lastId==='dinner_cook'){ addCounter('dinner_cook'); }
-      if(lastId==='dinner_dineout'){ addCounter('dinner_dineout'); }
-      if(lastId==='bath' || lastId==='bathTogether'){ addCounter('bath'); }
-      if(['talk','play','study','rest','tea','sleep','work','super','book','pharm','volunteer','walk','date','kiss','hug','pet','sleepTogether','bathTogether'].includes(lastId)){
-        addCounter('todayCats_'+(ACT[lastId]?.cat||'기타'));
-      }
-      // three distinct categories in a day
-      const cats = new Set(S.flags.lastTwoActs.map(id=>ACT[id]?.cat).filter(Boolean));
-      if(cats.size>=3) addCounter('threeDistinctCatsToday');
-      for(const ev of EVENTS){
-        if(ev.once && isEventDone(ev.id)) continue;
-        if(S.level<ev.level) continue; // only previous/equals? allow at or after level
-        if(!matchEvent(ev)) continue;
-        fireEvent(ev); break;
-      }
-    }
-
-    
-function matchEvent(ev){
-      const s=S.stats;
-      if(ev.trigger.stats){
-        for(const [k,cond] of Object.entries(ev.trigger.stats)){
-          if(cond.gte!=null && !(s[k]>=cond.gte)) return false;
-          if(cond.lte!=null && !(s[k]<=cond.lte)) return false;
-          if(cond.gt!=null && !(s[k]>cond.gt)) return false;
-          if(cond.lt!=null && !(s[k]<cond.lt)) return false;
-        }
-      }
-      if(ev.trigger.items){
-        for(const it of ev.trigger.items){ if(!S.inventory[it]) return false; }
-      }
-      if(ev.trigger.sequence){
-        const n=ev.trigger.sequence.length;
-        if(JSON.stringify(S.flags.lastTwoActs.slice(-n))!==JSON.stringify(ev.trigger.sequence)) return false;
-      }
-      if(ev.trigger.counter){
-  const __lvlMap = (lvlCounters[ev.level]||{});
-  for(const [key,need] of Object.entries(ev.trigger.counter)){
-    if((__lvlMap[key]||0) < need) return false;
-  }
-}
-      if(ev.trigger.meta){
-        if(ev.trigger.meta.threeDistinctCats && counters['threeDistinctCatsToday']==null) return false;
-        if(ev.trigger.meta.study2in3 && (S.flags.lastTwoActs.filter(x=>x==='study').length<2)) return false;
-        if(ev.trigger.meta.noRepeat && S.flags.repeatCount>0) return false;
-        if(ev.trigger.meta.mixedSW3){
-          const last = S.flags.lastTwoActs;
-          const sw = last.filter(x=>x==='study' || x==='work').length;
-          if(sw<3 || !(last.includes('study') && last.includes('work'))) return false;
-        }
-        if(ev.trigger.meta.todayAff16 && S.dayAff<16) return false;
-        if(typeof ev.trigger.meta.strBelow40Streak==='number' && S.daysStrBelow40Streak < ev.trigger.meta.strBelow40Streak) return false;
-        if(typeof ev.trigger.meta.lowRepeatStreak==='number' && S.daysLowRepeatStreak < ev.trigger.meta.lowRepeatStreak) return false;
-        if(typeof ev.trigger.meta.moodAtLeast==='number' && S.stats.MOOD < ev.trigger.meta.moodAtLeast) return false;
-      }
-      if(ev.time==='evening' && S.slot!==2) return false;
-      return true;
-    }
-
-
-    
-function fireEvent(ev){
-      // Apply reward immediately
-      applyDelta(ev.reward||{});
-      if(ev.reward && ev.reward.LABEL==='ringBuy'){
-        if(!S.flags.labels) S.flags.labels={};
-        S.flags.labels.ringBuy = true;
-        toast('<반지 구입 가능> 라벨을 얻었다!');
-      }
-      markEventDone(ev.id);
-      if(ev.id==='L8_TRU80_Ring_Talk'){ S.flags.vowed = true; try{ localStorage.setItem('vowed','1'); }catch(e){} }
-
-      // Register completed to previous level bucket (for level-up rule)
-      S.completedByLevel[Math.max(1, ev.level-1)]?.add(ev.id);
-
-      // Load assets: /events/{id}.png + .txt (fallback message if missing)
-      setIllustrationFallback([`/events/${ev.id}.png`,`/events/L${ev.level}/${ev.id}.png`,`/events/L${ev.level}.png`,`/events/placeholder.png`]);
-      switchMode('event');
-      try{ el.eventText.textContent = (TEXTS.events[ev.id] ?? (`events/${ev.id}.txt 가(이) 없습니다.`)); }catch(e){ el.eventText.textContent = `events/${ev.id}.txt 가(이) 없습니다.`; }
-      updateUI();
-    }
-    function isEventDone(id){ return localStorage.getItem('ev_'+id)==='1'; }
-    function markEventDone(id){ localStorage.setItem('ev_'+id,'1'); }
-
-    // ---------------------- Level Up ----------------------
-    function checkLevelUp(){
-      const next=S.level+1; const need=LEVEL_THRESH[next]; if(!need) return;
-      const hasAff = S.stats.AFF >= need;
-      // count distinct 7/11 of prev stage
-      const prev= S.level; const done = S.completedByLevel[prev] ? S.completedByLevel[prev].size : 0;
-      if(prev===1){ // L1→L2: no subevents requirement per spec
-        if(hasAff){ doLevelUp(next); }
-        return;
-      }
-      if(hasAff && done>=5){ doLevelUp(next); }
-    }
-
-    function doLevelUp(nextLv){
-      S.level = nextLv; toast(`레벨 ${nextLv} 달성!`);
-      // Show level-up assets
-      setIllustrationFallback([`/levelup/L${nextLv}.png`,`/events/L${nextLv}.png`,`/events/placeholder.png`]);
-      switchMode('event');
-      try{ el.eventText.textContent = (TEXTS.levelup['L'+nextLv] ?? (`levelup/L${nextLv}.txt 가(이) 없습니다.`)); }catch(e){ el.eventText.textContent = `levelup/L${nextLv}.txt 가(이) 없습니다.`; }
-      updateUI();
-    }
-
-
-    // ---------------------- Persistence ----------------------
-    function serializeCompletedByLevel(){
-      const out = {};
-      for(const k of Object.keys(S.completedByLevel||{})){
-        const v = S.completedByLevel[k];
-        out[k] = Array.from(v||[]);
-      }
-      return out;
-    }
-    function deserializeCompletedByLevel(obj){
-      const out = {};
-      for(const k of Object.keys(obj||{})){
-        out[k] = new Set(obj[k]||[]);
-      }
-      return out;
-    }
-    function saveGame(){
-      try{
-        const payload = {
-          S: {
-            ...S,
-            completedByLevel: serializeCompletedByLevel()
-          },
-          counters: {...counters},
-          lvlCounters: {...lvlCounters}
-        };
-        localStorage.setItem('sim_game_save_v1', JSON.stringify(payload));
-      }catch(e){}
-    }
-    function loadGame(){
-      try{
-        const s = localStorage.getItem('sim_game_save_v1');
-        if(!s) return false;
-        const payload = JSON.parse(s);
-        if(payload && payload.S){
-          const keep = S; // ensure shape defaults
-          Object.assign(S, payload.S);
-          S.completedByLevel = deserializeCompletedByLevel(payload.S.completedByLevel||{});
-          if(!S.flags) S.flags = {};
-          if(!S.flags.lastTwoActs) S.flags.lastTwoActs = [];
-          if(!S.inventory) S.inventory = {};
-        }
-        if(payload && payload.counters){
-          Object.assign(counters, payload.counters);
-        }
-        if(payload && payload.lvlCounters){
-          Object.assign(lvlCounters, payload.lvlCounters);
-        }
-        return true;
-      }catch(e){ return false; }
-    }
-    window.addEventListener('beforeunload', function(){ try{ if(sessionStorage.getItem('skipSave')==='1') return; }catch(e){} saveGame(); });
-
-    // Progress counter per current level (UI-only; do not alter rules)
-    function countLevelEventsDone(lv){
-      let n=0;
-      for(const ev of EVENTS){
-        if(ev.level===lv && ev.type==='sub' && isEventDone(ev.id)) n++;
-      }
-      return n;
-    }
-
-    // ---------------------- Boot ----------------------
-    try{ S.flags.vowed = (localStorage.getItem('vowed')==='1') || (typeof isEventDone==='function' && isEventDone('L8_TRU80_Ring_Talk')); }catch(e){}
-    // Load saved game if exists
-    loadGame(); try{ sessionStorage.removeItem('skipSave'); }catch(e){}
-
-    updateUI(); setIllustration('/img/title.png');
-  </script>
+})();
+</script>
 </body>
 </html>
