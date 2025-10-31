@@ -149,8 +149,8 @@
     <div id="bathPanel" class="hidden">
       <div class="note">목욕 시간이야. 어떻게 할까?</div>
       <div class="btns">
-        <button id="btnBathSolo">혼자서 목욕 (GLD≥3)</button>
-        <button id="btnBathTogether">함께 목욕 (L7+, GLD≥3, STR≤40, MOOD≥-1.0, 배스밤≥1)</button>
+        <button id="btnBathSolo">혼자서 목욕</button>
+        <button id="btnBathTogether">함께 목욕 (L7+, STR≤40, MOOD≥-1.0, 배스밤≥1)</button>
       </div>
     </div>
 
@@ -385,7 +385,8 @@
     if (S.timeIndex === 0){
       // new day
       S.day += 1;
-    }
+    
+  }
     // Enforce dinner/bath modes
     if (TIMES[S.timeIndex] === '저녁식사'){
       S.mode = 'dinner';
@@ -707,7 +708,7 @@
       },
       work: ()=>{
         if (!checkBtn('actWork')) return;
-        applyDelta({AFF:+0, TRU:+1, MOT:-2, MOOD:-0.5, STR:+12, STM:-18, GLD:+40});
+        applyDelta({AFF:+0, TRU:+1, MOT:-2, MOOD:-0.5, STR:+12, STM:-18, GLD:+25});
         setImage(IMG.work); nextTime();
       },
       market: ()=>{ if (!checkBtn('actMarket')) return; openMarket(); },
@@ -731,13 +732,13 @@
       date_cinema: ()=>{
         if (!checkBtn('actCinema')) return;
         inv.movieTicket -= 1;
-        applyDelta({AFF:+15, TRU:+5, MOT:+4, MOOD:+2.4, STR:-12, STM:-20, GLD:-25});
+        applyDelta({AFF:+12, TRU:+5, MOT:+7, MOOD:+1.5, STR:-12, STM:-20, GLD:-25});
         c.dateCinema += 1; setImage(IMG.date_cinema); nextTime();
       },
       date_amusement: ()=>{
         if (!checkBtn('actAmusement')) return;
         inv.amusementTicket -= 1;
-        applyDelta({AFF:+20, TRU:+6, MOT:+5, MOOD:+3.6, STR:-18, STM:-26, GLD:-60});
+        applyDelta({AFF:+15, TRU:+6, MOT:+17, MOOD:+1.8, STR:-18, STM:-26, GLD:-60});
         c.dateAmusement += 1; setImage(IMG.date_amusement); nextTime();
       },
     };
@@ -768,11 +769,11 @@
 
   function doBath(kind){
     if (kind==='solo'){
-      applyDelta({AFF:+0, TRU:+0, MOT:+0, MOOD:+0.8, STR:-12, STM:+12, GLD:-3});
+      applyDelta({AFF:+0, TRU:+0, MOT:+0, MOOD:+0.8, STR:-12, STM:+12});
       setImage(IMG.bath_alone);
     } else if (kind==='together'){
       S.inventory.bathbomb -= 1;
-      applyDelta({AFF:+6, TRU:+4, MOT:+2, MOOD:+1.3, STR:-18, STM:+12, GLD:-3});
+      applyDelta({AFF:+6, TRU:+4, MOT:+2, MOOD:+1.3, STR:-18, STM:+12});
       setImage(IMG.bath_together);
     }
     S.timeIndex = 5; S.mode = 'actions';
@@ -830,12 +831,27 @@
     setBtnEnabled('btnDinnerCook', (st.GLD>=8 && (inv.mealkit||0)>=1), 'GLD≥8, 밀키트≥1');
     setBtnEnabled('btnDinnerOut', (holiday && st.GLD>=50), '휴일, GLD≥50');
 
-    setBtnEnabled('btnBathSolo', (st.GLD>=3), 'GLD≥3');
-    setBtnEnabled('btnBathTogether', (lvl>=7 && st.GLD>=3 && str<=40 && mood>=-1.0 && (inv.bathbomb||0)>=1), 'L7+, GLD≥3, STR≤40, MOOD≥-1.0, 배스밤≥1');
+    setBtnEnabled('btnBathSolo', true, '');
+    setBtnEnabled('btnBathTogether', (lvl>=7 && str<=40 && mood>=-1.0 && (inv.bathbomb||0)>=1), 'L7+, STR≤40, MOOD≥-1.0, 배스밤≥1');
   }
 
-  // ---------- Render ----------
+  
+  // ---------- Dinner Safety (auto-skip when broke) ----------
+  function enforceDinnerSafety(){
+    // If currently at dinner time and cannot afford the cheapest meal (8 GLD),
+    // apply penalty (STM -> 0, MOOD -> -3) and automatically skip dinner -> bath.
+    if ((TIMES[S.timeIndex] === '저녁식사' || S.mode === 'dinner') && S.stats.GLD < 8){
+      S.stats.STM = 0;
+      S.stats.MOOD = -3;
+      // move to bath phase
+      S.timeIndex = 4; // '목욕'
+      S.mode = 'bath';
+      save();
+    }
+  }
+// ---------- Render ----------
   function renderAll(){
+    enforceDinnerSafety();
     byId('dayText').innerText = `${S.day}일째`;
     byId('timeText').innerText = TIMES[S.timeIndex];
     byId('levelText').innerText = `L${S.level}`;
@@ -945,6 +961,16 @@
     S.story.idx=0;
     setStoryFrame();
   } else {
+    renderAll();
+  }
+  
+  save();
+
+})();
+</script>
+</body>
+</html>
+e {
     renderAll();
   }
   
