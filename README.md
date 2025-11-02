@@ -1,3 +1,3 @@
 천문대를 좋아하는 설정 넣기<br>
-\\n 는 앞에 백슬래시 하나만 지우면 된다고함.<br>
-스토리추가할때 이런식으로 써야 오류안뜸 https://github.com/tchinso/RaisingACuteGirl/commit/b9ab2428387d78e459ffdf0150d9a6e61af32f31<br>
+\n\n 을 줄바꿈 대신 쓰고, 엔터는 전혀 없어야함.<br>
+이거보면 이해가갈듯 https://github.com/tchinso/RaisingACuteGirl/commit/b9ab2428387d78e459ffdf0150d9a6e61af32f31<br>
