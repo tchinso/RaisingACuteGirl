@@ -349,7 +349,7 @@
     ]};
 
   const STORY_IMGS = {
-    intro: [IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2],
+    intro: [IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_1, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2, IMG.intro_2],
     L2: [IMG.L2_1, IMG.L2_2, IMG.L2_3],
     L3: [IMG.L3_1, IMG.L3_2, IMG.L3_3],
     L4: [IMG.L4_1, IMG.L4_2, IMG.L4_3],
@@ -384,7 +384,7 @@
     stats: { AFF:0, TRU:0, MOT:0, MOOD:3, STR:0, STM:100, GLD:100 },
     counters: {
       pet:0, hug:0, kiss:0,
-      datePlanetarium:0, dateCinema:0, dateAmusement:0
+      datePlanetarium:0, dateCinema:0, dateAmusement:0, sleepTogether:0, bathTogether:0
     },
     inventory: {
       toy:0, mealkit:0, bathbomb:0,
@@ -463,11 +463,11 @@
     switch(target){
       case 2: return (st.AFF>=30 && st.TRU>=15 && st.MOT>=5);
       case 3: return (st.AFF>=100 && st.TRU>=45 && st.MOT>=15 && c.pet>=10);
-      case 4: return (st.AFF>=200 && st.TRU>=100 && st.MOT>=30 && c.dateCinema>=1 && c.dateAmusement>=1 && c.datePlanetarium>=1);
+      case 4: return (st.AFF>=200 && st.TRU>=100 && st.MOT>=30 && c.dateCinema>= 2 && c.dateAmusement>= 2 && c.datePlanetarium>= 2);
       case 5: return (st.AFF>=400 && st.TRU>=200 && st.MOT>=50 && c.hug>=5);
       case 6: return (st.AFF>=500 && st.TRU>=250 && st.MOT>=80 && c.kiss>=3);
-      case 7: return (st.AFF>=800 && st.TRU>=400 && st.MOT>=120 && c.datePlanetarium>=10);
-      case 8: return (st.AFF>=1200 && st.TRU>=600 && st.MOT>=200);
+      case 7: return (st.AFF>=800 && st.TRU>=400 && st.MOT>=120 && c.sleepTogether>=5);
+      case 8: return (st.AFF>=1200 && st.TRU>=600 && st.MOT>=200 && c.bathTogether>=3);
       default: return false;
     }
   }
@@ -730,7 +730,7 @@
       sleep_tog: ()=>{
         if (!checkBtn('actSleepTog')) return;
         applyDelta({AFF:+4, TRU:+3, MOT:+4, MOOD:+1, STR:-20, STM:+70, GLD:0});
-        setImage(IMG.sleep_together); skipToNextMorning();
+        setImage(IMG.sleep_together); c.sleepTogether += 1; skipToNextMorning();
       },
       work: ()=>{
         if (!checkBtn('actWork')) return;
@@ -798,7 +798,7 @@
       applyDelta({AFF:+0, TRU:+0, MOT:+0, MOOD:+0.8, STR:-12, STM:+12});
       setImage(IMG.bath_alone);
     } else if (kind==='together'){
-      S.inventory.bathbomb -= 1;
+      S.counters.bathTogether = (S.counters.bathTogether||0) + 1; S.inventory.bathbomb -= 1;
       applyDelta({AFF:+6, TRU:+4, MOT:+2, MOOD:+1.3, STR:-18, STM:+12});
       setImage(IMG.bath_together);
     }
